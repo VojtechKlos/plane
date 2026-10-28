@@ -131,6 +131,18 @@ MODULE_ORDER_BY_ALLOWLIST = frozenset({
     "sort_order",
 })
 
+# Workspace / project member lite list querysets. The user fields are read
+# off the related member.
+MEMBER_ORDER_BY_ALLOWLIST = frozenset({
+    "created_at",
+    "updated_at",
+    "role",
+    "first_name",
+    "last_name",
+    "email",
+    "display_name",
+})
+
 
 def sanitize_order_by(value, allowed_fields, default="-created_at"):
     """Return a safe ordering string derived from *value*.

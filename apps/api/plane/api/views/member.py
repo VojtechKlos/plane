@@ -5,8 +5,11 @@
 # Third Party imports
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
+from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (
     extend_schema,
+    OpenApiParameter,
     OpenApiResponse,
     OpenApiRequest,
 )
@@ -20,6 +23,8 @@ from plane.api.serializers import (
     ProjectMemberLiteAPISerializer,
 )
 from plane.db.models import User, Workspace, WorkspaceMember, Project, ProjectMember
+from plane.api.serializers.member import MEMBER_ROLE_SLUGS
+from plane.utils.order_queryset import MEMBER_ORDER_BY_ALLOWLIST, sanitize_order_by
 from plane.utils.permissions import ProjectMemberPermission, WorkSpaceAdminPermission, ProjectAdminPermission
 from plane.utils.openapi import (
     WORKSPACE_SLUG_PARAMETER,
@@ -34,6 +39,95 @@ from plane.utils.openapi import (
     PROJECT_MEMBER_EXAMPLE,
     create_paginated_response,
 )
+
+
+MEMBER_TEXT_FILTERS = ("first_name", "last_name", "email", "display_name")
+ROLES_BY_SLUG = {slug: role for role, slug in MEMBER_ROLE_SLUGS.items()}
+
+# The member-lite filters plane-sdk sends (MemberListQueryParams)
+MEMBER_LITE_FILTER_PARAMETERS = [
+    *[
+        OpenApiParameter(
+            name=field,
+            type=OpenApiTypes.STR,
+            location=OpenApiParameter.QUERY,
+            required=False,
+            description=f"Members whose {field.replace('_', ' ')} contains this text, ignoring case",
+        )
+        for field in MEMBER_TEXT_FILTERS
+    ],
+    OpenApiParameter(
+        name="role_slug",
+        type=OpenApiTypes.STR,
+        location=OpenApiParameter.QUERY,
+        required=False,
+        enum=list(ROLES_BY_SLUG),
+        description="Members with this role",
+    ),
+    OpenApiParameter(
+        name="is_active",
+        type=OpenApiTypes.BOOL,
+        location=OpenApiParameter.QUERY,
+        required=False,
+        description="Active (true) or deactivated (false) memberships",
+    ),
+    OpenApiParameter(
+        name="is_bot",
+        type=OpenApiTypes.BOOL,
+        location=OpenApiParameter.QUERY,
+        required=False,
+        description="Bot (true) or human (false) accounts",
+    ),
+    OpenApiParameter(
+        name="order_by",
+        type=OpenApiTypes.STR,
+        location=OpenApiParameter.QUERY,
+        required=False,
+        description=f"One of {', '.join(sorted(MEMBER_ORDER_BY_ALLOWLIST))}; prefix with '-' for descending",
+    ),
+]
+
+
+def bool_query_param(request, name):
+    value = request.GET.get(name)
+    if not value:
+        return None
+    if value.lower() in ("true", "1"):
+        return True
+    if value.lower() in ("false", "0"):
+        return False
+    raise ValidationError({name: f"'{value}' is not a boolean. Use true or false"})
+
+
+def filter_lite_members(request, queryset):
+    """Apply the member-lite filters and ordering to a WorkspaceMember or
+    ProjectMember queryset."""
+    for field in MEMBER_TEXT_FILTERS:
+        value = request.GET.get(field)
+        if value:
+            queryset = queryset.filter(**{f"member__{field}__icontains": value})
+
+    role_slug = request.GET.get("role_slug")
+    if role_slug:
+        if role_slug not in ROLES_BY_SLUG:
+            raise ValidationError(
+                {"role_slug": f"Invalid role slug '{role_slug}'. Valid values: {', '.join(ROLES_BY_SLUG)}"}
+            )
+        queryset = queryset.filter(role=ROLES_BY_SLUG[role_slug])
+
+    is_active = bool_query_param(request, "is_active")
+    if is_active is not None:
+        queryset = queryset.filter(is_active=is_active)
+
+    is_bot = bool_query_param(request, "is_bot")
+    if is_bot is not None:
+        queryset = queryset.filter(member__is_bot=is_bot)
+
+    order_by = sanitize_order_by(request.GET.get("order_by"), MEMBER_ORDER_BY_ALLOWLIST, default="-created_at")
+    field = order_by.lstrip("-")
+    if field in MEMBER_TEXT_FILTERS:
+        order_by = order_by.replace(field, f"member__{field}")
+    return queryset.order_by(order_by)
 
 
 class WorkspaceMemberAPIEndpoint(BaseAPIView):
@@ -246,7 +340,7 @@ class WorkspaceMemberLiteAPIEndpoint(BaseAPIView):
         summary="List workspace members (lite)",
         description="Retrieve a paginated, lightweight list of workspace members for pickers and directories.",
         tags=["Members"],
-        parameters=[WORKSPACE_SLUG_PARAMETER, CURSOR_PARAMETER, PER_PAGE_PARAMETER],
+        parameters=[WORKSPACE_SLUG_PARAMETER, CURSOR_PARAMETER, PER_PAGE_PARAMETER, *MEMBER_LITE_FILTER_PARAMETERS],
         responses={
             200: create_paginated_response(
                 WorkspaceMemberLiteAPISerializer,
@@ -272,8 +366,8 @@ class WorkspaceMemberLiteAPIEndpoint(BaseAPIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        workspace_members = (
-            WorkspaceMember.objects.filter(workspace__slug=slug).select_related("member").order_by("-created_at")
+        workspace_members = filter_lite_members(
+            request, WorkspaceMember.objects.filter(workspace__slug=slug).select_related("member")
         )
         return self.paginate(
             request=request,
@@ -293,7 +387,13 @@ class ProjectMemberLiteAPIEndpoint(BaseAPIView):
         summary="List project members (lite)",
         description="Retrieve a paginated, lightweight list of project members for pickers and directories.",
         tags=["Members"],
-        parameters=[WORKSPACE_SLUG_PARAMETER, PROJECT_ID_PARAMETER, CURSOR_PARAMETER, PER_PAGE_PARAMETER],
+        parameters=[
+            WORKSPACE_SLUG_PARAMETER,
+            PROJECT_ID_PARAMETER,
+            CURSOR_PARAMETER,
+            PER_PAGE_PARAMETER,
+            *MEMBER_LITE_FILTER_PARAMETERS,
+        ],
         responses={
             200: create_paginated_response(
                 ProjectMemberLiteAPISerializer,
@@ -325,10 +425,8 @@ class ProjectMemberLiteAPIEndpoint(BaseAPIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        project_members = (
-            ProjectMember.objects.filter(project_id=project_id, workspace__slug=slug)
-            .select_related("member")
-            .order_by("-created_at")
+        project_members = filter_lite_members(
+            request, ProjectMember.objects.filter(project_id=project_id, workspace__slug=slug).select_related("member")
         )
         return self.paginate(
             request=request,

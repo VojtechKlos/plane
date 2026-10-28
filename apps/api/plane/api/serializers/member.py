@@ -66,6 +66,10 @@ class ProjectMemberSerializer(BaseSerializer):
         read_only_fields = ["id"]
 
 
+# Role slugs plane-sdk uses for the integer roles
+MEMBER_ROLE_SLUGS = {ROLE.ADMIN.value: "admin", ROLE.MEMBER.value: "member", ROLE.GUEST.value: "guest"}
+
+
 class BaseMemberLiteAPISerializer(BaseSerializer):
     """Common flattened member representation for paginated member pickers/directories."""
 
@@ -77,6 +81,10 @@ class BaseMemberLiteAPISerializer(BaseSerializer):
     avatar_url = serializers.CharField(source="member.avatar_url", read_only=True, allow_null=True)
     display_name = serializers.CharField(source="member.display_name", read_only=True)
     is_bot = serializers.BooleanField(source="member.is_bot", read_only=True)
+    role_slug = serializers.SerializerMethodField()
+
+    def get_role_slug(self, obj):
+        return MEMBER_ROLE_SLUGS.get(obj.role)
 
     class Meta:
         fields = [
@@ -88,6 +96,7 @@ class BaseMemberLiteAPISerializer(BaseSerializer):
             "avatar_url",
             "display_name",
             "role",
+            "role_slug",
             "is_active",
             "is_bot",
         ]

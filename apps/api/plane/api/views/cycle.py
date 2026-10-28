@@ -21,7 +21,8 @@ from django.db.models import (
 # Third party imports
 from rest_framework import status
 from rest_framework.response import Response
-from drf_spectacular.utils import OpenApiRequest, OpenApiResponse
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiParameter, OpenApiRequest, OpenApiResponse
 
 # Module imports
 from plane.api.serializers import (
@@ -80,6 +81,23 @@ from plane.utils.openapi import (
     UNARCHIVED_RESPONSE,
     REQUIRED_FIELDS_RESPONSE,
 )
+
+
+CYCLE_STATUSES = ("current", "upcoming", "completed", "draft", "incomplete")
+
+
+def filter_cycles_by_status(queryset, cycle_status):
+    """Narrow ``queryset`` to the cycles with ``cycle_status``, one of CYCLE_STATUSES."""
+    now = timezone.now()
+    if cycle_status == "current":
+        return queryset.filter(start_date__lte=now, end_date__gte=now)
+    if cycle_status == "upcoming":
+        return queryset.filter(start_date__gt=now)
+    if cycle_status == "completed":
+        return queryset.filter(end_date__lt=now)
+    if cycle_status == "draft":
+        return queryset.filter(end_date=None, start_date=None)
+    return queryset.filter(Q(end_date__gte=now) | Q(end_date__isnull=True))
 
 
 class CycleListCreateAPIEndpoint(BaseAPIView):
@@ -200,7 +218,8 @@ class CycleListCreateAPIEndpoint(BaseAPIView):
         """
         project = Project.objects.get(workspace__slug=slug, pk=project_id)
         queryset = self.get_queryset().filter(archived_at__isnull=True)
-        cycle_view = request.GET.get("cycle_view", "all")
+        # plane-sdk sends `status`; `cycle_view` is its deprecated alias
+        cycle_view = request.GET.get("status") or request.GET.get("cycle_view", "all")
 
         # Current Cycle
         if cycle_view == "current":
@@ -372,7 +391,19 @@ class CycleListLiteAPIEndpoint(BaseAPIView):
         operation_id="list_cycles_lite",
         summary="List cycles (lite)",
         description="Retrieve a paginated, lightweight list of cycles in a project for pickers and references.",
-        parameters=[CURSOR_PARAMETER, PER_PAGE_PARAMETER, ORDER_BY_PARAMETER],
+        parameters=[
+            CURSOR_PARAMETER,
+            PER_PAGE_PARAMETER,
+            ORDER_BY_PARAMETER,
+            OpenApiParameter(
+                name="status",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                enum=list(CYCLE_STATUSES),
+                description="Only cycles with this status. Omit for all cycles.",
+            ),
+        ],
         responses={
             200: create_paginated_response(
                 CycleLiteSerializer,
@@ -388,6 +419,13 @@ class CycleListLiteAPIEndpoint(BaseAPIView):
         Retrieve a paginated, lightweight list of non-archived cycles in a project,
         optimized for pickers and references.
         """
+        cycle_status = request.GET.get("status")
+        if cycle_status and cycle_status not in CYCLE_STATUSES:
+            return Response(
+                {"status": f"Invalid status '{cycle_status}'. Valid values: {', '.join(CYCLE_STATUSES)}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         cycles = (
             Cycle.objects.filter(workspace__slug=slug, project_id=project_id)
             .filter(archived_at__isnull=True)
@@ -401,6 +439,9 @@ class CycleListLiteAPIEndpoint(BaseAPIView):
             )
             .distinct()
         )
+        if cycle_status:
+            cycles = filter_cycles_by_status(cycles, cycle_status)
+
         return self.paginate(
             request=request,
             queryset=cycles,
