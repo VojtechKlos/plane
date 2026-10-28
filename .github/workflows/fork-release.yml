@@ -1,0 +1,104 @@
+name: Fork Release
+
+# Publishes a release of this fork for deployments/cli/community/install.sh
+# (setup.sh): the images go to ghcr.io/<owner>/plane-*:<tag>, and the GitHub
+# release carries setup.sh, docker-compose.yml and variables.env.
+#
+# Release by pushing a tag: git tag crs-2026.10.28 && git push origin crs-2026.10.28
+
+on:
+  push:
+    tags:
+      - "crs-*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing crs-* tag to build and release again"
+        required: true
+
+permissions:
+  contents: write
+  packages: write
+
+env:
+  RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+
+jobs:
+  images:
+    name: Build ${{ matrix.image }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: plane-frontend
+            context: .
+            dockerfile: apps/web/Dockerfile.web
+          - image: plane-space
+            context: .
+            dockerfile: apps/space/Dockerfile.space
+          - image: plane-admin
+            context: .
+            dockerfile: apps/admin/Dockerfile.admin
+          - image: plane-live
+            context: .
+            dockerfile: apps/live/Dockerfile.live
+          - image: plane-backend
+            context: apps/api
+            dockerfile: apps/api/Dockerfile.api
+          - image: plane-proxy
+            context: apps/proxy
+            dockerfile: apps/proxy/Dockerfile.ce
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+
+      - name: Image owner
+        id: owner
+        # Registry paths must be lowercase
+        run: echo "name=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v4
+
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v7
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          platforms: linux/amd64
+          push: true
+          # The attestation makes the push an image index listing the platform,
+          # which setup.sh checks with `docker manifest inspect`
+          provenance: true
+          tags: ghcr.io/${{ steps.owner.outputs.name }}/${{ matrix.image }}:${{ env.RELEASE_TAG }}
+          labels: org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+
+  release:
+    name: Publish release
+    needs: images
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+
+      - name: Create or update the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp deployments/cli/community/install.sh setup.sh
+          assets="setup.sh deployments/cli/community/docker-compose.yml deployments/cli/community/variables.env"
+          if gh release view "$RELEASE_TAG" > /dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" $assets --clobber
+          else
+            gh release create "$RELEASE_TAG" $assets --title "$RELEASE_TAG" --generate-notes --latest
+          fi
