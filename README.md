@@ -1,3 +1,8 @@
+> [!WARNING]
+> **This is a personal fork of [makeplane/plane](https://github.com/makeplane/plane), maintained for my own purposes.**
+> No support will be given at any point: issues, pull requests and questions will not be answered.
+> It is not affiliated with or endorsed by Plane Software, Inc. For the official project, its releases and support, go to [makeplane/plane](https://github.com/makeplane/plane).
+
 <br /><br />
 
 <p align="center">
