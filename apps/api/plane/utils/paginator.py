@@ -157,7 +157,7 @@ class OffsetPaginator:
         if cursor.value != limit and cursor.is_prev:
             results = results[-(limit + 1) :]
 
-        total_count = self.total_count_queryset.count() if self.total_count_queryset else queryset.count()
+        total_count = self.total_count_queryset.count() if self.total_count_queryset is not None else queryset.count()
 
         # Check if there are more results available after the current page
 
