@@ -2,21 +2,14 @@
 	servers {
 		trusted_proxies static private_ranges
 	}
-
-	order rate_limit before file_server
 }
 
 :3000 {
 	root * /usr/share/caddy/html
 
-	# Per-client-IP rate limiting for static asset requests
-	rate_limit {
-		zone static {
-			key {client_ip}
-			events 300
-			window 1m
-		}
-	}
+	# No rate limit: a page load fetches over a hundred files, offices share one
+	# client IP, and the API behind the proxy applies its own throttles.
+	encode zstd gzip
 
 	# Security headers (HSTS is set at the TLS terminator)
 	header {
@@ -25,9 +18,22 @@
 		X-XSS-Protection "1; mode=block"
 	}
 
-	# SPA fallback
-	try_files {path} /index.html
-	file_server
+	# Build output: file names carry a content hash, so a URL never changes
+	handle /assets/* {
+		# Only on success, so a 404 for a not-yet-deployed file is not cached
+		header {
+			Cache-Control "public, max-age=31536000, immutable"
+			match status 200
+		}
+		file_server
+	}
+
+	# SPA fallback; revalidate it so a new release is picked up
+	handle {
+		header Cache-Control "no-cache"
+		try_files {path} /index.html
+		file_server
+	}
 
 	# Access logs to stdout (default in Caddy)
 	log {
