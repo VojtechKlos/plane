@@ -16,6 +16,7 @@ from urllib.parse import urljoin
 import dj_database_url
 
 # Django imports
+from django.core.exceptions import ImproperlyConfigured
 from django.core.management.utils import get_random_secret_key
 from corsheaders.defaults import default_headers
 
@@ -378,6 +379,7 @@ CELERY_IMPORTS = (
     "plane.bgtasks.file_asset_task",
     "plane.bgtasks.email_notification_task",
     "plane.bgtasks.cleanup_task",
+    "plane.bgtasks.project_auto_membership_task",
     "plane.license.bgtasks.telemetry_metrics",
     # management tasks
     "plane.bgtasks.dummy_data_task",
@@ -387,6 +389,15 @@ CELERY_IMPORTS = (
 )
 
 FILE_SIZE_LIMIT = int(os.environ.get("FILE_SIZE_LIMIT", 5242880))
+
+# Add every workspace member (above Guest) to every project of the workspace
+# (on by default; PROJECT_AUTO_MEMBERSHIP=0 turns it off),
+# see plane/utils/project_auto_membership.py. The role is capped at the
+# member's workspace role: 5 = Guest (read + comment), 15 = Member, 20 = Admin.
+PROJECT_AUTO_MEMBERSHIP = os.environ.get("PROJECT_AUTO_MEMBERSHIP", "1") == "1"
+PROJECT_AUTO_MEMBERSHIP_ROLE = int(os.environ.get("PROJECT_AUTO_MEMBERSHIP_ROLE", "5"))
+if PROJECT_AUTO_MEMBERSHIP_ROLE not in (5, 15, 20):
+    raise ImproperlyConfigured("PROJECT_AUTO_MEMBERSHIP_ROLE must be 5 (Guest), 15 (Member) or 20 (Admin)")
 
 # Unsplash Access key
 UNSPLASH_ACCESS_KEY = os.environ.get("UNSPLASH_ACCESS_KEY")

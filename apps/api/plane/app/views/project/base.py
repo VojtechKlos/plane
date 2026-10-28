@@ -43,6 +43,7 @@ from plane.db.models import (
 from plane.db.models.intake import IntakeIssueStatus
 from plane.utils.host import base_host
 from plane.utils.order_queryset import PROJECT_ORDER_BY_ALLOWLIST, sanitize_order_by
+from plane.utils.project_auto_membership import auto_join_projects
 
 
 class ProjectViewSet(BaseViewSet):
@@ -278,6 +279,9 @@ class ProjectViewSet(BaseViewSet):
                     member_id=serializer.data["project_lead"],
                     role=ROLE.ADMIN.value,
                 )
+
+            # Add the rest of the workspace (no-op unless PROJECT_AUTO_MEMBERSHIP)
+            auto_join_projects(workspace.id, project_ids=[serializer.instance.id])
 
             State.objects.bulk_create(
                 [

@@ -24,6 +24,7 @@ from plane.app.serializers import (
 from plane.app.views.base import BaseAPIView
 from plane.db.models import Project, ProjectMember, WorkspaceMember, DraftIssue
 from plane.utils.cache import invalidate_cache
+from plane.utils.project_auto_membership import auto_join_projects
 
 from .. import BaseViewSet
 
@@ -131,6 +132,9 @@ class WorkSpaceMemberViewSet(BaseViewSet):
             workspace_member.role = role
             # Write only these columns so a concurrent removal or view_props save isn't reverted.
             workspace_member.save(update_fields=["role", "updated_at", "updated_by"])
+
+        # A guest promoted to member gets the projects every member has
+        auto_join_projects(workspace_member.workspace_id, user_ids=[workspace_member.member_id])
 
         return Response(WorkSpaceMemberSerializer(workspace_member).data, status=status.HTTP_200_OK)
 

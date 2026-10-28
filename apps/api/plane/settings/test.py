@@ -8,6 +8,10 @@ from .common import *  # noqa
 
 DEBUG = True
 
+# Upstream tests expect workspace members to stay out of projects they were not
+# added to; the auto-membership tests switch it on themselves
+PROJECT_AUTO_MEMBERSHIP = False
+
 # Send it in a dummy outbox
 EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
 

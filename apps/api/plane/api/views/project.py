@@ -43,6 +43,7 @@ from plane.utils.exception_logger import log_exception
 from .base import BaseAPIView
 from plane.utils.host import base_host
 from plane.utils.order_queryset import PROJECT_ORDER_BY_ALLOWLIST, sanitize_order_by
+from plane.utils.project_auto_membership import auto_join_projects
 from plane.api.serializers import (
     ProjectSerializer,
     ProjectLiteSerializer,
@@ -257,6 +258,9 @@ class ProjectListCreateAPIEndpoint(BaseAPIView):
                             member_id=serializer.instance.project_lead_id,
                             role=20,
                         )
+
+                    # Add the rest of the workspace (no-op unless PROJECT_AUTO_MEMBERSHIP)
+                    auto_join_projects(workspace.id, project_ids=[serializer.instance.id])
 
                     State.objects.bulk_create(
                         [

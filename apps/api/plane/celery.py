@@ -53,6 +53,10 @@ app.conf.beat_schedule = {
         "task": "plane.bgtasks.issue_automation_task.unsnooze_expired_intake_issues",
         "schedule": crontab(minute="*/5"),  # Every 5 minutes
     },
+    "check-every-fifteen-minutes-to-sync-project-memberships": {
+        "task": "plane.bgtasks.project_auto_membership_task.sync_project_memberships",
+        "schedule": crontab(minute="*/15"),  # Every 15 minutes; no-op unless PROJECT_AUTO_MEMBERSHIP
+    },
     "push-instance-metrics": {
         "task": "plane.license.bgtasks.telemetry_metrics.push_instance_metrics",
         "schedule": schedule(run_every=timedelta(minutes=METRICS_PUSH_INTERVAL_MINUTES)),

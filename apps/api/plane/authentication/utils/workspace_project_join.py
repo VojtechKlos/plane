@@ -10,6 +10,7 @@ from plane.db.models import (
     WorkspaceMemberInvite,
 )
 from plane.utils.cache import invalidate_cache_directly
+from plane.utils.project_auto_membership import auto_join_projects
 
 
 def process_workspace_project_invitations(user):
@@ -68,6 +69,12 @@ def process_workspace_project_invitations(user):
         ],
         ignore_conflicts=True,
     )
+
+    workspace_ids = {invite.workspace_id for invite in workspace_member_invites} | {
+        invite.workspace_id for invite in project_member_invites
+    }
+    for workspace_id in workspace_ids:
+        auto_join_projects(workspace_id, user_ids=[user.id])
 
     # Delete all the invites
     workspace_member_invites.delete()

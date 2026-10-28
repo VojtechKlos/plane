@@ -34,6 +34,7 @@ from plane.db.models import (
 )
 from plane.db.models.project import ProjectNetwork
 from plane.utils.host import base_host
+from plane.utils.project_auto_membership import auto_join_projects
 
 
 class ProjectInvitationsViewset(BaseViewSet):
@@ -171,6 +172,16 @@ class UserProjectInvitationsViewset(BaseViewSet):
             workspace__slug=slug, project_id__in=validated_project_ids, member=request.user, is_active=False
         ).update(is_active=True, role=workspace_role, updated_by=request.user, updated_at=timezone.now())
 
+        # An active member with a lower role, e.g. a Guest added by
+        # PROJECT_AUTO_MEMBERSHIP, joins with their workspace role.
+        _ = ProjectMember.objects.filter(
+            workspace__slug=slug,
+            project_id__in=validated_project_ids,
+            member=request.user,
+            is_active=True,
+            role__lt=workspace_role,
+        ).update(role=workspace_role, updated_by=request.user, updated_at=timezone.now())
+
         ProjectMember.objects.bulk_create(
             [
                 ProjectMember(
@@ -283,6 +294,9 @@ class ProjectJoinEndpoint(BaseAPIView):
                     project_member.is_active = True
                     project_member.role = project_invite.role
                     project_member.save()
+
+                # The invite may have made them a workspace member too
+                auto_join_projects(project_invite.workspace_id, user_ids=[user.id])
 
                 return Response(
                     {"message": "Project Invitation Accepted"},
