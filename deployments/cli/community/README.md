@@ -66,10 +66,12 @@ cd plane-selfhost
 #### For _Docker Compose_ based setup
 
 ```
-curl -fsSL -o setup.sh https://github.com/makeplane/plane/releases/latest/download/setup.sh
+curl -fsSL -o setup.sh https://github.com/VojtechKlos/plane/releases/latest/download/setup.sh
 
 chmod +x setup.sh
 ```
+
+> This is the CRS fork's `setup.sh`: it installs and upgrades to the fork's releases (tags `crs-*`, images `ghcr.io/vojtechklos/plane-*`), published by `.github/workflows/fork-release.yml`. To move an existing official install onto the fork, replace its `setup.sh` with this one and run `./setup.sh upgrade`.
 
 #### For _Docker Swarm_ based setup
 

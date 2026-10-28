@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
 
-BRANCH=${BRANCH:-master}
+# Installs and upgrades the CRS fork of Plane: releases, docker-compose.yml and
+# variables.env come from the fork's GitHub releases, images from its registry.
+BRANCH=${BRANCH:-preview}
 SCRIPT_DIR=$PWD
 SERVICE_FOLDER=plane-app
 PLANE_INSTALL_DIR=$PWD/$SERVICE_FOLDER
 export APP_RELEASE=stable
 export DOCKERHUB_USER=makeplane
 export PULL_POLICY=${PULL_POLICY:-if_not_present}
-export GH_REPO=makeplane/plane
+export GH_REPO=VojtechKlos/plane
+# Must match the image names in docker-compose.yml
+export IMAGE_PREFIX=ghcr.io/vojtechklos
 export RELEASE_DOWNLOAD_URL="https://github.com/$GH_REPO/releases/download"
 export FALLBACK_DOWNLOAD_URL="https://raw.githubusercontent.com/$GH_REPO/$BRANCH/deployments/cli/community"
 
@@ -77,7 +81,7 @@ function initialize(){
         return 1
     fi
 
-    local IMAGE_NAME=makeplane/plane-proxy
+    local IMAGE_NAME=$IMAGE_PREFIX/plane-proxy
     local IMAGE_TAG=${APP_RELEASE}
     docker manifest inspect "${IMAGE_NAME}:${IMAGE_TAG}" | grep -q "\"architecture\": \"${CPU_ARCH}\"" &
     local pid=$!
@@ -213,7 +217,7 @@ function generateStorageCredentials(){
 function buildYourOwnImage(){
     echo "Building images locally..."
 
-    export DOCKERHUB_USER="myplane"
+    export DOCKERHUB_USER="$IMAGE_PREFIX"
     export APP_RELEASE="local"
     export PULL_POLICY="never"
     CUSTOM_BUILD="true"
@@ -334,7 +338,7 @@ function download() {
     generateStorageCredentials
 
     if [ "$LOCAL_BUILD" == "true" ]; then
-        export DOCKERHUB_USER="myplane"
+        export DOCKERHUB_USER="$IMAGE_PREFIX"
         export APP_RELEASE="local"
         export PULL_POLICY="never"
         CUSTOM_BUILD="true"
