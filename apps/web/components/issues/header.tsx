@@ -22,6 +22,7 @@ import { BreadcrumbLink } from "@/components/common/breadcrumb-link";
 import { CountChip } from "@/components/common/count-chip";
 // constants
 import { HeaderFilters } from "@/components/issues/filters";
+import { JoinProjectButton } from "@/components/project/join-project-button";
 // helpers
 // hooks
 import { useCommandPalette } from "@/hooks/store/use-command-palette";
@@ -118,6 +119,9 @@ export const IssuesHeader = observer(function IssuesHeader() {
             canUserCreateIssue={canUserCreateIssue}
           />
         </div>
+        {workspaceSlug && currentProjectDetails && (
+          <JoinProjectButton workspaceSlug={workspaceSlug.toString()} project={currentProjectDetails} />
+        )}
         {canUserCreateIssue && (
           <Button
             variant="primary"
