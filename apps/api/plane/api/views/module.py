@@ -41,6 +41,7 @@ from plane.db.models import (
 )
 
 from .base import BaseAPIView
+from .work_item_filters import InvalidWorkItemFilter, WorkItemFilters
 from .issue import guest_cannot_view_issue, is_restricted_guest
 from plane.bgtasks.webhook_task import model_activity
 from plane.utils.host import base_host
@@ -54,6 +55,8 @@ from plane.utils.openapi import (
     CURSOR_PARAMETER,
     PER_PAGE_PARAMETER,
     ORDER_BY_PARAMETER,
+    PQL_PARAMETER,
+    FILTERS_PARAMETER,
     FIELDS_PARAMETER,
     EXPAND_PARAMETER,
     create_paginated_response,
@@ -628,6 +631,8 @@ class ModuleIssueListCreateAPIEndpoint(BaseAPIView):
             CURSOR_PARAMETER,
             PER_PAGE_PARAMETER,
             ORDER_BY_PARAMETER,
+            PQL_PARAMETER,
+            FILTERS_PARAMETER,
             FIELDS_PARAMETER,
             EXPAND_PARAMETER,
         ],
@@ -649,8 +654,17 @@ class ModuleIssueListCreateAPIEndpoint(BaseAPIView):
         Returns paginated results including assignees, labels, and attachments.
         """
         order_by = sanitize_order_by(request.GET.get("order_by", "created_at"), ISSUE_ORDER_BY_ALLOWLIST, "created_at")
+        try:
+            work_item_filters = WorkItemFilters(request, slug)
+        except InvalidWorkItemFilter as exc:
+            return exc.response()
+
         issues = (
-            Issue.issue_objects.filter(issue_module__module_id=module_id, issue_module__deleted_at__isnull=True)
+            work_item_filters.apply(
+                work_item_filters.base_queryset().filter(
+                    issue_module__module_id=module_id, issue_module__deleted_at__isnull=True
+                )
+            )
             .annotate(
                 sub_issues_count=Issue.issue_objects.filter(parent=OuterRef("id"))
                 .order_by()

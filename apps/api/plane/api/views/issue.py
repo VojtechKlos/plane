@@ -12,17 +12,11 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponseRedirect
 from django.db import IntegrityError
 from django.db.models import (
-    Case,
-    CharField,
     Exists,
     F,
     Func,
-    Max,
     OuterRef,
     Q,
-    Value,
-    When,
-    Subquery,
 )
 
 from django.utils import timezone
@@ -77,7 +71,6 @@ from plane.db.models import (
     Label,
     Project,
     ProjectMember,
-    CycleIssue,
     Workspace,
     WorkspaceMember,
 )
@@ -90,6 +83,12 @@ from plane.utils.order_queryset import (
 )
 from plane.bgtasks.storage_metadata_task import get_asset_object_metadata
 from .base import BaseAPIView
+from .work_item_filters import (
+    InvalidWorkItemFilter,
+    WorkItemFilters,
+    order_work_items,
+    work_item_list_queryset,
+)
 from plane.utils.host import base_host
 from plane.utils.serializers import writable_data
 from plane.utils.issue_relation_mapper import get_actual_relation
@@ -119,6 +118,8 @@ from plane.utils.openapi import (
     EXTERNAL_ID_PARAMETER,
     EXTERNAL_SOURCE_PARAMETER,
     ORDER_BY_PARAMETER,
+    PQL_PARAMETER,
+    FILTERS_PARAMETER,
     SEARCH_PARAMETER_REQUIRED,
     LIMIT_PARAMETER,
     WORKSPACE_SEARCH_PARAMETER,
@@ -339,25 +340,6 @@ class IssueListCreateAPIEndpoint(BaseAPIView):
     serializer_class = IssueSerializer
     use_read_replica = True
 
-    def get_queryset(self):
-        return (
-            Issue.issue_objects.annotate(
-                sub_issues_count=Issue.issue_objects.filter(parent=OuterRef("id"))
-                .order_by()
-                .annotate(count=Func(F("id"), function="Count"))
-                .values("count")
-            )
-            .filter(project_id=self.kwargs.get("project_id"))
-            .filter(workspace__slug=self.kwargs.get("slug"))
-            .select_related("project")
-            .select_related("workspace")
-            .select_related("state")
-            .select_related("parent")
-            .prefetch_related("assignees")
-            .prefetch_related("labels")
-            .order_by(self.kwargs.get("order_by", "-created_at"))
-        ).distinct()
-
     @work_item_docs(
         operation_id="list_work_items",
         summary="List work items",
@@ -368,6 +350,8 @@ class IssueListCreateAPIEndpoint(BaseAPIView):
             EXTERNAL_ID_PARAMETER,
             EXTERNAL_SOURCE_PARAMETER,
             ORDER_BY_PARAMETER,
+            PQL_PARAMETER,
+            FILTERS_PARAMETER,
             FIELDS_PARAMETER,
             EXPAND_PARAMETER,
         ],
@@ -389,19 +373,10 @@ class IssueListCreateAPIEndpoint(BaseAPIView):
         Supports filtering, ordering, and field selection through query parameters.
         """
 
-        unsupported_filters = [param for param in ("pql", "filters") if request.GET.get(param)]
-        if unsupported_filters:
-            return Response(
-                {
-                    "pql": (
-                        "PQL and structured filters are not supported on this Plane edition. "
-                        "Remove the pql/filters parameter and filter results client-side, or use "
-                        "a Plane edition that supports work item query filtering."
-                    ),
-                    "unsupported_parameters": unsupported_filters,
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        try:
+            work_item_filters = WorkItemFilters(request, slug)
+        except InvalidWorkItemFilter as exc:
+            return exc.response()
 
         external_id = request.GET.get("external_id")
         external_source = request.GET.get("external_source")
@@ -424,10 +399,6 @@ class IssueListCreateAPIEndpoint(BaseAPIView):
         # only see work items they created -- mirrors IssueViewSet.list.
         restricted_guest = is_restricted_guest(request.user.id, project_id, slug)
 
-        # Custom ordering for priority and state
-        priority_order = ["urgent", "high", "medium", "low", "none"]
-        state_order = ["backlog", "unstarted", "started", "completed", "cancelled"]
-
         # Reject any field not in the allowlist before it reaches .order_by().
         # An unrecognised value is replaced with the safe default, preventing
         # ORM order_by injection via relational traversal (GHSA-p885-6jpg-cr2p).
@@ -437,73 +408,15 @@ class IssueListCreateAPIEndpoint(BaseAPIView):
             default="-created_at",
         )
 
-        issue_queryset = (
-            self.get_queryset()
-            .annotate(
-                cycle_id=Subquery(
-                    CycleIssue.objects.filter(issue=OuterRef("id"), deleted_at__isnull=True).values("cycle_id")[:1]
-                )
-            )
-            .annotate(
-                link_count=IssueLink.objects.filter(issue=OuterRef("id"))
-                .order_by()
-                .annotate(count=Func(F("id"), function="Count"))
-                .values("count")
-            )
-            .annotate(
-                attachment_count=FileAsset.objects.filter(
-                    issue_id=OuterRef("id"),
-                    entity_type=FileAsset.EntityTypeContext.ISSUE_ATTACHMENT,
-                )
-                .order_by()
-                .annotate(count=Func(F("id"), function="Count"))
-                .values("count")
-            )
-        )
-
-        total_issue_queryset = Issue.issue_objects.filter(project_id=project_id, workspace__slug=slug)
+        # pql/filters narrow both the page and the total count
+        total_issue_queryset = work_item_filters.apply(
+            work_item_filters.base_queryset().filter(project_id=project_id, workspace__slug=slug)
+        ).distinct()
 
         if restricted_guest:
-            issue_queryset = issue_queryset.filter(created_by=request.user)
             total_issue_queryset = total_issue_queryset.filter(created_by=request.user)
 
-        # Priority Ordering
-        if order_by_param == "priority" or order_by_param == "-priority":
-            priority_order = priority_order if order_by_param == "priority" else priority_order[::-1]
-            issue_queryset = issue_queryset.annotate(
-                priority_order=Case(
-                    *[When(priority=p, then=Value(i)) for i, p in enumerate(priority_order)],
-                    output_field=CharField(),
-                )
-            ).order_by("priority_order")
-
-        # State Ordering
-        elif order_by_param in [
-            "state__name",
-            "state__group",
-            "-state__name",
-            "-state__group",
-        ]:
-            state_order = state_order if order_by_param in ["state__name", "state__group"] else state_order[::-1]
-            issue_queryset = issue_queryset.annotate(
-                state_order=Case(
-                    *[When(state__group=state_group, then=Value(i)) for i, state_group in enumerate(state_order)],
-                    default=Value(len(state_order)),
-                    output_field=CharField(),
-                )
-            ).order_by("state_order")
-        # assignee and label ordering
-        elif order_by_param in [
-            "labels__name",
-            "-labels__name",
-            "assignees__first_name",
-            "-assignees__first_name",
-        ]:
-            issue_queryset = issue_queryset.annotate(
-                max_values=Max(order_by_param[1::] if order_by_param.startswith("-") else order_by_param)
-            ).order_by("-max_values" if order_by_param.startswith("-") else "max_values")
-        else:
-            issue_queryset = issue_queryset.order_by(order_by_param)
+        issue_queryset = order_work_items(work_item_list_queryset(total_issue_queryset), order_by_param)
 
         return self.paginate(
             request=request,

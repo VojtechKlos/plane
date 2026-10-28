@@ -350,6 +350,72 @@ ORDER_BY_PARAMETER = OpenApiParameter(
     ],
 )
 
+# Work item filter parameters
+PQL_PARAMETER = OpenApiParameter(
+    name="pql",
+    type=OpenApiTypes.STR,
+    location=OpenApiParameter.QUERY,
+    description=(
+        "Plane Query Language expression to filter work items, at most 5 conditions. "
+        "An invalid expression returns 400 with the problem under the `pql` key."
+    ),
+    required=False,
+    examples=[
+        OpenApiExample(
+            name="My urgent open work items",
+            value='priority = "urgent" AND assignee = currentUser() AND stateGroup IN openStates()',
+        ),
+        OpenApiExample(
+            name="Overdue in the active cycle",
+            value="isOverdue() AND cycle IN activeCycle()",
+        ),
+    ],
+)
+
+FILTERS_PARAMETER = OpenApiParameter(
+    name="filters",
+    type=OpenApiTypes.STR,
+    location=OpenApiParameter.QUERY,
+    description=(
+        "JSON filter expression with nested `and`/`or`/`not` groups, e.g. "
+        '`{"and":[{"priority":"urgent"},{"state_group__in":["unstarted","started"]}]}`'
+    ),
+    required=False,
+)
+
+WORK_ITEM_GROUP_BY_VALUES = [
+    "state_id",
+    "state__group",
+    "priority",
+    "project_id",
+    "type_id",
+    "labels__id",
+    "assignees__id",
+    "issue_module__module_id",
+    "cycle_id",
+    "created_by",
+    "target_date",
+    "start_date",
+]
+
+GROUP_BY_PARAMETER = OpenApiParameter(
+    name="group_by",
+    type=OpenApiTypes.STR,
+    location=OpenApiParameter.QUERY,
+    description="Field to group counts by",
+    required=False,
+    enum=WORK_ITEM_GROUP_BY_VALUES,
+)
+
+SUB_GROUP_BY_PARAMETER = OpenApiParameter(
+    name="sub_group_by",
+    type=OpenApiTypes.STR,
+    location=OpenApiParameter.QUERY,
+    description="Second field to group counts by within each group. Requires `group_by`",
+    required=False,
+    enum=WORK_ITEM_GROUP_BY_VALUES,
+)
+
 # Search Parameters
 SEARCH_PARAMETER = OpenApiParameter(
     name="search",

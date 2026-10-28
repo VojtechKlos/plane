@@ -49,6 +49,7 @@ from plane.utils.cycle_transfer_issues import transfer_cycle_issues
 from plane.utils.order_queryset import CYCLE_ORDER_BY_ALLOWLIST, ISSUE_ORDER_BY_ALLOWLIST, sanitize_order_by
 from plane.utils.host import base_host
 from .base import BaseAPIView
+from .work_item_filters import InvalidWorkItemFilter, WorkItemFilters
 from .issue import guest_cannot_view_issue, is_restricted_guest
 from plane.bgtasks.webhook_task import model_activity
 from plane.utils.openapi.decorators import cycle_docs
@@ -57,6 +58,8 @@ from plane.utils.openapi import (
     PER_PAGE_PARAMETER,
     CYCLE_VIEW_PARAMETER,
     ORDER_BY_PARAMETER,
+    PQL_PARAMETER,
+    FILTERS_PARAMETER,
     FIELDS_PARAMETER,
     EXPAND_PARAMETER,
     create_paginated_response,
@@ -878,7 +881,7 @@ class CycleIssueListCreateAPIEndpoint(BaseAPIView):
         operation_id="list_cycle_work_items",
         summary="List cycle work items",
         description="Retrieve all work items assigned to a cycle.",
-        parameters=[CURSOR_PARAMETER, PER_PAGE_PARAMETER],
+        parameters=[CURSOR_PARAMETER, PER_PAGE_PARAMETER, PQL_PARAMETER, FILTERS_PARAMETER],
         request={},
         responses={
             200: create_paginated_response(
@@ -897,8 +900,17 @@ class CycleIssueListCreateAPIEndpoint(BaseAPIView):
         """
         # List
         order_by = sanitize_order_by(request.GET.get("order_by", "created_at"), ISSUE_ORDER_BY_ALLOWLIST, "created_at")
+        try:
+            work_item_filters = WorkItemFilters(request, slug)
+        except InvalidWorkItemFilter as exc:
+            return exc.response()
+
         issues = (
-            Issue.issue_objects.filter(issue_cycle__cycle_id=cycle_id, issue_cycle__deleted_at__isnull=True)
+            work_item_filters.apply(
+                work_item_filters.base_queryset().filter(
+                    issue_cycle__cycle_id=cycle_id, issue_cycle__deleted_at__isnull=True
+                )
+            )
             .annotate(
                 sub_issues_count=Issue.issue_objects.filter(parent=OuterRef("id"))
                 .order_by()
