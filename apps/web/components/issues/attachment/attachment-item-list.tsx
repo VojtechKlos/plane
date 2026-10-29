@@ -20,6 +20,7 @@ import { useFileSize } from "@/hooks/use-file-size";
 // types
 import type { TAttachmentHelpers } from "../issue-detail-widgets/attachments/helper";
 // components
+import { IssueAttachmentLightbox } from "./attachment-lightbox";
 import { IssueAttachmentsListItem } from "./attachment-list-item";
 import { IssueAttachmentsUploadItem } from "./attachment-list-upload-item";
 // types
@@ -100,7 +101,7 @@ export const IssueAttachmentItemList = observer(function IssueAttachmentItemList
       });
       return;
     },
-    [createAttachment, maxFileSize, workspaceSlug, handleFetchPropertyActivities]
+    [createAttachment, maxFileSize, workspaceSlug, handleFetchPropertyActivities, t]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -112,8 +113,8 @@ export const IssueAttachmentItemList = observer(function IssueAttachmentItemList
 
   return (
     <>
-      {uploadStatus?.map((uploadStatus) => (
-        <IssueAttachmentsUploadItem key={uploadStatus.id} uploadStatus={uploadStatus} />
+      {uploadStatus?.map((status) => (
+        <IssueAttachmentsUploadItem key={status.id} uploadStatus={status} />
       ))}
       {issueAttachments && (
         <>
@@ -126,6 +127,7 @@ export const IssueAttachmentItemList = observer(function IssueAttachmentItemList
               issueServiceType={issueServiceType}
             />
           )}
+          <IssueAttachmentLightbox issueId={issueId} disabled={disabled} issueServiceType={issueServiceType} />
           <div
             {...getRootProps()}
             className={`relative flex flex-col ${isDragActive && issueAttachments.length < 3 ? "min-h-[200px]" : ""} ${disabled ? "cursor-not-allowed" : "cursor-pointer"}`}

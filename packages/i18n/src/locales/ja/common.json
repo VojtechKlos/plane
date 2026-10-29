@@ -768,7 +768,17 @@
     "only_one_file_allowed": "一度にアップロードできるファイルは1つだけです。",
     "file_size_limit": "ファイルサイズは{size}MB以下である必要があります。",
     "drag_and_drop": "どこにでもドラッグ＆ドロップでアップロード",
-    "delete": "添付ファイルを削除"
+    "delete": "添付ファイルを削除",
+    "download": "ダウンロード",
+    "uploaded_by": "{name}が{date}にアップロード"
+  },
+  "image_lightbox": {
+    "label": "画像プレビュー",
+    "previous": "前の画像",
+    "next": "次の画像",
+    "zoom_in": "拡大",
+    "zoom_out": "縮小",
+    "download": "ダウンロード"
   },
   "label": {
     "select": "ラベルを選択",

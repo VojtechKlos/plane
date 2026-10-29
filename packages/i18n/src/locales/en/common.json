@@ -768,7 +768,17 @@
     "only_one_file_allowed": "Only one file can be uploaded at a time.",
     "file_size_limit": "File must be of {size}MB or less in size.",
     "drag_and_drop": "Drag and drop anywhere to upload",
-    "delete": "Delete attachment"
+    "delete": "Delete attachment",
+    "download": "Download",
+    "uploaded_by": "Uploaded by {name} on {date}"
+  },
+  "image_lightbox": {
+    "label": "Image preview",
+    "previous": "Previous image",
+    "next": "Next image",
+    "zoom_in": "Zoom in",
+    "zoom_out": "Zoom out",
+    "download": "Download"
   },
   "label": {
     "select": "Add labels",

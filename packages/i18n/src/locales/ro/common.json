@@ -768,7 +768,17 @@
     "only_one_file_allowed": "Se poate încărca doar un fișier o dată.",
     "file_size_limit": "Fișierul trebuie să aibă {size}MB sau mai puțin.",
     "drag_and_drop": "Trage și plasează oriunde pentru a încărca",
-    "delete": "Șterge atașamentul"
+    "delete": "Șterge atașamentul",
+    "download": "Descarcă",
+    "uploaded_by": "Încărcat de {name} pe {date}"
+  },
+  "image_lightbox": {
+    "label": "Previzualizare imagine",
+    "previous": "Imaginea anterioară",
+    "next": "Imaginea următoare",
+    "zoom_in": "Mărește",
+    "zoom_out": "Micșorează",
+    "download": "Descarcă"
   },
   "label": {
     "select": "Selectează eticheta",

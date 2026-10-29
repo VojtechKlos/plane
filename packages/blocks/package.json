@@ -26,6 +26,7 @@
     "./emoji-reaction": "./dist/emoji-reaction/index.js",
     "./empty-state": "./dist/empty-state/index.js",
     "./icons": "./dist/icons/index.js",
+    "./image-lightbox": "./dist/image-lightbox/index.js",
     "./layout": "./dist/layout/index.js",
     "./pill-button": "./dist/pill-button/index.js",
     "./portal": "./dist/portal/index.js",

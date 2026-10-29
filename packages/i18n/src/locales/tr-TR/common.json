@@ -768,7 +768,17 @@
     "only_one_file_allowed": "Aynı anda yalnızca bir dosya yüklenebilir.",
     "file_size_limit": "Dosya boyutu {size}MB veya daha az olmalıdır.",
     "drag_and_drop": "Yüklemek için herhangi bir yere sürükleyip bırakın",
-    "delete": "Eki sil"
+    "delete": "Eki sil",
+    "download": "İndir",
+    "uploaded_by": "{name} tarafından {date} tarihinde yüklendi"
+  },
+  "image_lightbox": {
+    "label": "Görsel önizleme",
+    "previous": "Önceki görsel",
+    "next": "Sonraki görsel",
+    "zoom_in": "Yakınlaştır",
+    "zoom_out": "Uzaklaştır",
+    "download": "İndir"
   },
   "label": {
     "select": "Etiket seç",

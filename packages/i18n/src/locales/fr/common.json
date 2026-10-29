@@ -768,7 +768,17 @@
     "only_one_file_allowed": "Un seul fichier peut être téléchargé à la fois.",
     "file_size_limit": "Le fichier doit faire {size}MB ou moins.",
     "drag_and_drop": "Glissez-déposez n’importe où pour uploader",
-    "delete": "Supprimer la pièce jointe"
+    "delete": "Supprimer la pièce jointe",
+    "download": "Télécharger",
+    "uploaded_by": "Importé par {name} le {date}"
+  },
+  "image_lightbox": {
+    "label": "Aperçu de l'image",
+    "previous": "Image précédente",
+    "next": "Image suivante",
+    "zoom_in": "Zoom avant",
+    "zoom_out": "Zoom arrière",
+    "download": "Télécharger"
   },
   "label": {
     "select": "Sélectionner une étiquette",

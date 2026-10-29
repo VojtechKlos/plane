@@ -768,7 +768,17 @@
     "only_one_file_allowed": "Hanya satu file yang dapat diunggah pada satu waktu.",
     "file_size_limit": "File harus berukuran {size}MB atau lebih kecil.",
     "drag_and_drop": "Seret dan jatuhkan di mana saja untuk mengunggah",
-    "delete": "Hapus lampiran"
+    "delete": "Hapus lampiran",
+    "download": "Unduh",
+    "uploaded_by": "Diunggah oleh {name} pada {date}"
+  },
+  "image_lightbox": {
+    "label": "Pratinjau gambar",
+    "previous": "Gambar sebelumnya",
+    "next": "Gambar berikutnya",
+    "zoom_in": "Perbesar",
+    "zoom_out": "Perkecil",
+    "download": "Unduh"
   },
   "label": {
     "select": "Pilih label",

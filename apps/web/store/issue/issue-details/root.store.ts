@@ -87,6 +87,7 @@ export interface IIssueDetail
   isRelationModalOpen: TIssueRelationModal | null;
   isSubIssuesModalOpen: string | null;
   attachmentDeleteModalId: string | null;
+  attachmentLightboxId: string | null;
   // computed
   isAnyModalOpen: boolean;
   isPeekOpen: boolean;
@@ -103,6 +104,7 @@ export interface IIssueDetail
   toggleRelationModal: (issueId: string | null, relationType: TIssueRelationTypes | null) => void;
   toggleSubIssuesModal: (value: string | null) => void;
   toggleDeleteAttachmentModal: (attachmentId: string | null) => void;
+  toggleAttachmentLightbox: (attachmentId: string | null) => void;
   setOpenWidgets: (state: TWorkItemWidgets[]) => void;
   setLastWidgetAction: (action: TWorkItemWidgets) => void;
   toggleOpenWidget: (state: TWorkItemWidgets) => void;
@@ -149,6 +151,7 @@ export class IssueDetail implements IIssueDetail {
   isRelationModalOpen: TIssueRelationModal | null = null;
   isSubIssuesModalOpen: string | null = null;
   attachmentDeleteModalId: string | null = null;
+  attachmentLightboxId: string | null = null;
   // service type
   serviceType: TIssueServiceType;
   // store
@@ -179,6 +182,7 @@ export class IssueDetail implements IIssueDetail {
       isRelationModalOpen: observable.ref,
       isSubIssuesModalOpen: observable.ref,
       attachmentDeleteModalId: observable.ref,
+      attachmentLightboxId: observable.ref,
       openWidgets: observable.ref,
       lastWidgetAction: observable.ref,
       // computed
@@ -195,6 +199,7 @@ export class IssueDetail implements IIssueDetail {
       toggleRelationModal: action,
       toggleSubIssuesModal: action,
       toggleDeleteAttachmentModal: action,
+      toggleAttachmentLightbox: action,
       setOpenWidgets: action,
       setLastWidgetAction: action,
       toggleOpenWidget: action,
@@ -227,7 +232,8 @@ export class IssueDetail implements IIssueDetail {
       !!this.isArchiveIssueModalOpen ||
       !!this.isRelationModalOpen?.issueId ||
       !!this.isSubIssuesModalOpen ||
-      !!this.attachmentDeleteModalId
+      !!this.attachmentDeleteModalId ||
+      !!this.attachmentLightboxId
     );
   }
 
@@ -251,12 +257,13 @@ export class IssueDetail implements IIssueDetail {
     (this.isRelationModalOpen = { issueId, relationType });
   toggleSubIssuesModal = (issueId: string | null) => (this.isSubIssuesModalOpen = issueId);
   toggleDeleteAttachmentModal = (attachmentId: string | null) => (this.attachmentDeleteModalId = attachmentId);
+  toggleAttachmentLightbox = (attachmentId: string | null) => (this.attachmentLightboxId = attachmentId);
   setOpenWidgets = (state: TWorkItemWidgets[]) => {
     this.openWidgets = state;
     if (this.lastWidgetAction) this.lastWidgetAction = null;
   };
-  setLastWidgetAction = (action: TWorkItemWidgets) => {
-    this.openWidgets = [action];
+  setLastWidgetAction = (widget: TWorkItemWidgets) => {
+    this.openWidgets = [widget];
   };
   toggleOpenWidget = (state: TWorkItemWidgets) => {
     if (this.openWidgets && this.openWidgets.includes(state))

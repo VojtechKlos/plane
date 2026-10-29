@@ -768,7 +768,17 @@
     "only_one_file_allowed": "Je možné nahrať iba jeden súbor naraz.",
     "file_size_limit": "Súbor musí byť menší ako {size}MB.",
     "drag_and_drop": "Pretiahnite súbor kamkoľvek pre nahratie",
-    "delete": "Zmazať prílohu"
+    "delete": "Zmazať prílohu",
+    "download": "Stiahnuť",
+    "uploaded_by": "Nahrané používateľom {name} dňa {date}"
+  },
+  "image_lightbox": {
+    "label": "Náhľad obrázka",
+    "previous": "Predchádzajúci obrázok",
+    "next": "Ďalší obrázok",
+    "zoom_in": "Priblížiť",
+    "zoom_out": "Oddialiť",
+    "download": "Stiahnuť"
   },
   "label": {
     "select": "Vybrať štítok",

@@ -20,6 +20,11 @@ export const ACCEPTED_COVER_IMAGE_MIME_TYPES_FOR_REACT_DROPZONE = {
 };
 
 /**
+ * Image types the API serves inline (its `INLINE_SAFE_MIME_TYPES`), so they can be previewed in the browser
+ */
+export const INLINE_PREVIEWABLE_IMAGE_MIME_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
+
+/**
  * Dangerous file extensions that should be blocked
  */
 export const DANGEROUS_EXTENSIONS = [

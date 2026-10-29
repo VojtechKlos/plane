@@ -768,7 +768,17 @@
     "only_one_file_allowed": "Es kann jeweils nur eine Datei hochgeladen werden.",
     "file_size_limit": "Die Datei muss kleiner als {size} MB sein.",
     "drag_and_drop": "Datei hierher ziehen, um sie hochzuladen",
-    "delete": "Anhang löschen"
+    "delete": "Anhang löschen",
+    "download": "Herunterladen",
+    "uploaded_by": "Hochgeladen von {name} am {date}"
+  },
+  "image_lightbox": {
+    "label": "Bildvorschau",
+    "previous": "Vorheriges Bild",
+    "next": "Nächstes Bild",
+    "zoom_in": "Vergrößern",
+    "zoom_out": "Verkleinern",
+    "download": "Herunterladen"
   },
   "label": {
     "select": "Label auswählen",

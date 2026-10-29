@@ -4,10 +4,11 @@
  * See the LICENSE file for details.
  */
 
+import { useState } from "react";
 import { observer } from "mobx-react";
 
 import { useTranslation } from "@plane/i18n";
-import { DeleteOutline, MoreHorizontalOutline } from "@makeplane/propel/icons";
+import { DeleteOutline, DownloadOutline, MoreHorizontalOutline } from "@makeplane/propel/icons";
 import { Tooltip } from "@makeplane/propel/components/tooltip";
 import type { TIssueServiceType } from "@plane/types";
 import { EIssueServiceType } from "@plane/types";
@@ -25,6 +26,8 @@ import { getFileIcon } from "@/components/icons";
 import { useIssueDetail } from "@/hooks/store/use-issue-detail";
 import { useMember } from "@/hooks/store/use-member";
 import { usePlatformOS } from "@/hooks/use-platform-os";
+// local imports
+import { downloadAttachment, getAttachmentInlineURL, isPreviewableImageAttachment } from "./helper";
 
 type TIssueAttachmentsListItem = {
   attachmentId: string;
@@ -41,13 +44,18 @@ export const IssueAttachmentsListItem = observer(function IssueAttachmentsListIt
   const {
     attachment: { getAttachmentById },
     toggleDeleteAttachmentModal,
+    toggleAttachmentLightbox,
   } = useIssueDetail(issueServiceType);
+  // states
+  const [hasThumbnailFailed, setHasThumbnailFailed] = useState(false);
   // derived values
   const attachment = attachmentId ? getAttachmentById(attachmentId) : undefined;
   const fileName = getFileName(attachment?.attributes.name ?? "");
   const fileExtension = getFileExtension(attachment?.attributes.name ?? "");
   const fileIcon = getFileIcon(fileExtension, 18);
   const fileURL = getFileURL(attachment?.asset_url ?? "");
+  const isImage = isPreviewableImageAttachment(attachment);
+  const thumbnailURL = attachment && isImage && !hasThumbnailFailed ? getAttachmentInlineURL(attachment) : undefined;
   // hooks
   const { isMobile } = usePlatformOS();
 
@@ -60,12 +68,25 @@ export const IssueAttachmentsListItem = observer(function IssueAttachmentsListIt
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          window.open(fileURL, "_blank");
+          if (isImage) toggleAttachmentLightbox(attachmentId);
+          else window.open(fileURL, "_blank");
         }}
       >
         <div className="group flex h-11 items-center justify-between gap-3 px-3 hover:bg-surface-2">
           <div className="flex items-center gap-3 truncate text-13">
-            <div className="flex items-center gap-3">{fileIcon}</div>
+            <div className="flex items-center gap-3">
+              {thumbnailURL ? (
+                <img
+                  src={thumbnailURL}
+                  alt=""
+                  loading="lazy"
+                  className="size-7 shrink-0 rounded-sm object-cover"
+                  onError={() => setHasThumbnailFailed(true)}
+                />
+              ) : (
+                fileIcon
+              )}
+            </div>
             <Tooltip label={`${fileName}.${fileExtension}`} layout="stacked" disabled={isMobile}>
               <p className="truncate font-medium text-secondary">{`${fileName}.${fileExtension}`}</p>
             </Tooltip>
@@ -109,7 +130,6 @@ export const IssueAttachmentsListItem = observer(function IssueAttachmentsListIt
                     <IconButton
                       variant="ghost"
                       size="sm"
-                      disabled={disabled}
                       aria-label={t("aria_labels.common.more_actions")}
                       icon={<Icon icon={MoreHorizontalOutline} />}
                     />
@@ -117,8 +137,14 @@ export const IssueAttachmentsListItem = observer(function IssueAttachmentsListIt
                 />
                 <MenuContent side="bottom" align="end">
                   <MenuItem
+                    icon={<Icon icon={DownloadOutline} />}
+                    label={t("attachment.download")}
+                    onClick={() => downloadAttachment(attachment)}
+                  />
+                  <MenuItem
                     icon={<Icon icon={DeleteOutline} />}
                     label={t("common.actions.delete")}
+                    disabled={disabled}
                     onClick={() => {
                       toggleDeleteAttachmentModal(attachmentId);
                     }}

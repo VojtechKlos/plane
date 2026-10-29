@@ -768,7 +768,17 @@
     "only_one_file_allowed": "Solo se puede subir un archivo a la vez.",
     "file_size_limit": "El archivo debe tener {size}MB o menos de tamaño.",
     "drag_and_drop": "Arrastra y suelta en cualquier lugar para subir",
-    "delete": "Eliminar archivo adjunto"
+    "delete": "Eliminar archivo adjunto",
+    "download": "Descargar",
+    "uploaded_by": "Subido por {name} el {date}"
+  },
+  "image_lightbox": {
+    "label": "Vista previa de la imagen",
+    "previous": "Imagen anterior",
+    "next": "Imagen siguiente",
+    "zoom_in": "Acercar",
+    "zoom_out": "Alejar",
+    "download": "Descargar"
   },
   "label": {
     "select": "Seleccionar etiqueta",

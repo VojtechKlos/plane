@@ -768,7 +768,17 @@
     "only_one_file_allowed": "È possibile caricare un solo file alla volta.",
     "file_size_limit": "Il file deve essere di {size}MB o meno.",
     "drag_and_drop": "Trascina e rilascia ovunque per caricare",
-    "delete": "Elimina allegato"
+    "delete": "Elimina allegato",
+    "download": "Scarica",
+    "uploaded_by": "Caricato da {name} il {date}"
+  },
+  "image_lightbox": {
+    "label": "Anteprima immagine",
+    "previous": "Immagine precedente",
+    "next": "Immagine successiva",
+    "zoom_in": "Ingrandisci",
+    "zoom_out": "Riduci",
+    "download": "Scarica"
   },
   "label": {
     "select": "Seleziona etichetta",

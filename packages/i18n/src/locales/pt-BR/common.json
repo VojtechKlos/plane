@@ -768,7 +768,17 @@
     "only_one_file_allowed": "Apenas um arquivo pode ser enviado por vez.",
     "file_size_limit": "O arquivo deve ter {size}MB ou menos.",
     "drag_and_drop": "Arraste e solte em qualquer lugar para enviar",
-    "delete": "Excluir anexo"
+    "delete": "Excluir anexo",
+    "download": "Baixar",
+    "uploaded_by": "Enviado por {name} em {date}"
+  },
+  "image_lightbox": {
+    "label": "Visualização da imagem",
+    "previous": "Imagem anterior",
+    "next": "Próxima imagem",
+    "zoom_in": "Ampliar",
+    "zoom_out": "Reduzir",
+    "download": "Baixar"
   },
   "label": {
     "select": "Selecionar etiqueta",

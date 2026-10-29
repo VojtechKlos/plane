@@ -768,7 +768,17 @@
     "only_one_file_allowed": "Chỉ có thể tải lên một tệp mỗi lần.",
     "file_size_limit": "Kích thước tệp phải nhỏ hơn hoặc bằng {size}MB.",
     "drag_and_drop": "Kéo và thả vào bất kỳ đâu để tải lên",
-    "delete": "Xóa tệp đính kèm"
+    "delete": "Xóa tệp đính kèm",
+    "download": "Tải xuống",
+    "uploaded_by": "Được tải lên bởi {name} vào {date}"
+  },
+  "image_lightbox": {
+    "label": "Xem trước hình ảnh",
+    "previous": "Hình ảnh trước",
+    "next": "Hình ảnh tiếp theo",
+    "zoom_in": "Phóng to",
+    "zoom_out": "Thu nhỏ",
+    "download": "Tải xuống"
   },
   "label": {
     "select": "Chọn nhãn",
