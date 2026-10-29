@@ -220,11 +220,15 @@ class IssueAttachmentV2Endpoint(BaseAPIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
+            # `?disposition=inline` previews an image in the browser; S3Storage honours it only
+            # for an allow-listed image type and falls back to an attachment for anything else.
+            disposition = "inline" if request.GET.get("disposition") == "inline" else "attachment"
             storage = S3Storage(request=request)
             presigned_url = storage.generate_presigned_url(
                 object_name=asset.asset.name,
-                disposition="attachment",
+                disposition=disposition,
                 filename=asset.attributes.get("name"),
+                content_type=asset.attributes.get("type"),
             )
             return HttpResponseRedirect(presigned_url)
 
