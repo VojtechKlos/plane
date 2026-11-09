@@ -101,6 +101,7 @@ export class IssueStore implements IIssueStore {
     // store handlers from issue detail
     // parent
     if (issue && issue?.parent && issue?.parent?.id && issue?.parent?.project_id) {
+      // oxlint-disable-next-line promise/always-return
       this.issueService.retrieve(workspaceSlug, issue.parent.project_id, issue?.parent?.id).then((res) => {
         this.rootIssueDetailStore.rootIssueStore.issues.addIssue([res]);
       });
@@ -163,6 +164,7 @@ export class IssueStore implements IIssueStore {
       updated_at: issue?.updated_at,
       start_date: issue?.start_date,
       target_date: issue?.target_date,
+      teamogy_job_id: issue?.teamogy_job_id,
       completed_at: issue?.completed_at,
       archived_at: issue?.archived_at,
       created_by: issue?.created_by,
@@ -286,6 +288,7 @@ export class IssueStore implements IIssueStore {
 
     // handle parent issue if exists
     if (issue?.parent && issue?.parent?.id && issue?.parent?.project_id) {
+      // oxlint-disable-next-line promise/always-return
       this.issueService.retrieve(workspaceSlug, issue.parent.project_id, issue.parent.id).then((res) => {
         this.rootIssueDetailStore.rootIssueStore.issues.addIssue([res]);
       });

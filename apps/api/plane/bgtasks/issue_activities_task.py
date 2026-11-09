@@ -35,6 +35,7 @@ from plane.db.models import (
 from plane.settings.redis import redis_instance
 from plane.utils.exception_logger import log_exception
 from plane.utils.issue_relation_mapper import get_inverse_relation
+from plane.utils.teamogy import normalize_teamogy_job_id
 from plane.utils.uuid import is_valid_uuid
 
 
@@ -261,6 +262,36 @@ def track_target_date(
                 project_id=project_id,
                 workspace_id=workspace_id,
                 comment="updated the target date to",
+                epoch=epoch,
+            )
+        )
+
+
+# Track changes in the Teamogy job ID
+def track_teamogy_job_id(
+    requested_data,
+    current_instance,
+    issue_id,
+    project_id,
+    workspace_id,
+    actor_id,
+    issue_activities,
+    epoch,
+):
+    old_value = normalize_teamogy_job_id(current_instance.get("teamogy_job_id"))
+    new_value = normalize_teamogy_job_id(requested_data.get("teamogy_job_id"))
+    if old_value != new_value:
+        issue_activities.append(
+            IssueActivity(
+                issue_id=issue_id,
+                actor_id=actor_id,
+                verb="updated",
+                old_value=old_value or "",
+                new_value=new_value or "",
+                field="teamogy_job_id",
+                project_id=project_id,
+                workspace_id=workspace_id,
+                comment="updated the Teamogy job ID to",
                 epoch=epoch,
             )
         )
@@ -641,6 +672,7 @@ def update_issue_activity(
         "description_html": track_description,
         "target_date": track_target_date,
         "start_date": track_start_date,
+        "teamogy_job_id": track_teamogy_job_id,
         "label_ids": track_labels,
         "assignee_ids": track_assignees,
         "estimate_point": track_estimate_points,

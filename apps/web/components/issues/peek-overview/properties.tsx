@@ -12,6 +12,7 @@ import {
   CyclesOutline,
   DueDateOutline,
   EstimateOutline,
+  HashOutline,
   LabelsOutline,
   MembersOutline,
   ModuleOutline,
@@ -21,7 +22,7 @@ import {
   StateOutline,
   UserOutline,
 } from "@makeplane/propel/icons";
-import { DateSelect } from "@plane/blocks/property-select";
+import { DateSelect, TextPropertyInput } from "@plane/blocks/property-select";
 import { cn, getDate, renderFormattedPayloadDate, shouldHighlightIssueDueDate } from "@plane/utils";
 // components
 import { EstimateSelect } from "@/components/dropdowns/estimate/estimate-select";
@@ -188,6 +189,18 @@ export const PeekOverviewProperties = observer(function PeekOverviewProperties(p
             />
           </SidebarPropertyListItem>
         )}
+
+        <SidebarPropertyListItem icon={HashOutline} label={t("common.teamogy_job_id")}>
+          <TextPropertyInput
+            testId="peek-teamogy-job-id-input"
+            value={issue.teamogy_job_id}
+            onChange={(value) => issueOperations.update(workspaceSlug, projectId, issueId, { teamogy_job_id: value })}
+            placeholder={t("issue.add.teamogy_job_id")}
+            ariaLabel={t("common.teamogy_job_id")}
+            disabled={disabled}
+            variant="select-ghost-md"
+          />
+        </SidebarPropertyListItem>
 
         {projectDetails?.module_view && (
           <SidebarPropertyListItem icon={ModuleOutline} label={t("common.modules")}>

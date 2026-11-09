@@ -18,6 +18,7 @@
       "assignee": "მინიჭებულის დამატება",
       "start_date": "დაწყების თარიღის დამატება",
       "due_date": "ვადის თარიღის დამატება",
+      "teamogy_job_id": "Teamogy Job ID-ის დამატება",
       "parent": "მშობელი სამუშაო ელემენტის დამატება",
       "sub_issue": "ქვე-სამუშაო ელემენტის დამატება",
       "dependency": "Add dependency",

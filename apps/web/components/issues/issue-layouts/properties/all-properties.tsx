@@ -10,7 +10,14 @@ import { xor } from "lodash-es";
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
 // icons
-import { AttachOutline, DueDateOutline, LinkOutline, StartDateOutline, ViewsOutline } from "@makeplane/propel/icons";
+import {
+  AttachOutline,
+  DueDateOutline,
+  HashOutline,
+  LinkOutline,
+  StartDateOutline,
+  ViewsOutline,
+} from "@makeplane/propel/icons";
 // i18n
 import { useTranslation } from "@plane/i18n";
 import { Tooltip } from "@makeplane/propel/components/tooltip";
@@ -455,6 +462,25 @@ export const IssueProperties = observer(function IssueProperties(props: IIssuePr
           >
             <LinkOutline className="h-3 w-3 flex-shrink-0" />
             <div className="text-caption-sm-regular">{issue.link_count}</div>
+          </div>
+        </Tooltip>
+      </WithDisplayPropertiesHOC>
+
+      {/* teamogy job id */}
+      <WithDisplayPropertiesHOC
+        displayProperties={displayProperties}
+        displayPropertyKey="teamogy_job_id"
+        shouldRenderProperty={(properties) => !!properties.teamogy_job_id && !!issue.teamogy_job_id}
+      >
+        <Tooltip label={`${t("common.teamogy_job_id")}: ${issue.teamogy_job_id}`} disabled={isMobile}>
+          {/* oxlint-disable-next-line jsx_a11y/click-events-have-key-events oxlint-disable-next-line jsx_a11y/no-static-element-interactions */}
+          <div
+            className="flex h-5 max-w-40 flex-shrink-0 items-center justify-center gap-1 overflow-hidden rounded-sm border-[0.5px] border-strong px-2.5 py-1"
+            onFocus={handleEventPropagation}
+            onClick={handleEventPropagation}
+          >
+            <HashOutline className="h-3 w-3 flex-shrink-0" />
+            <div className="truncate text-caption-sm-regular">{issue.teamogy_job_id}</div>
           </div>
         </Tooltip>
       </WithDisplayPropertiesHOC>

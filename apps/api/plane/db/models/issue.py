@@ -161,6 +161,7 @@ class Issue(ChangeTrackerMixin, ProjectBaseModel):
     is_draft = models.BooleanField(default=False)
     external_source = models.CharField(max_length=255, null=True, blank=True)
     external_id = models.CharField(max_length=255, blank=True, null=True)
+    teamogy_job_id = models.CharField(max_length=255, blank=True, null=True)
     type = models.ForeignKey(
         "db.IssueType",
         on_delete=models.SET_NULL,
@@ -704,6 +705,7 @@ class IssueVersion(ProjectBaseModel):
     is_draft = models.BooleanField(default=False)
     external_source = models.CharField(max_length=255, null=True, blank=True)
     external_id = models.CharField(max_length=255, blank=True, null=True)
+    teamogy_job_id = models.CharField(max_length=255, blank=True, null=True)
     type = models.UUIDField(blank=True, null=True)
     cycle = models.UUIDField(null=True, blank=True)
     modules = ArrayField(models.UUIDField(), blank=True, default=list)
@@ -765,6 +767,7 @@ class IssueVersion(ProjectBaseModel):
                 is_draft=issue.is_draft,
                 external_source=issue.external_source,
                 external_id=issue.external_id,
+                teamogy_job_id=issue.teamogy_job_id,
                 type=issue.type_id,
                 cycle=cycle_issue.cycle_id if cycle_issue else None,
                 modules=list(Module.objects.filter(issue=issue).values_list("id", flat=True)),

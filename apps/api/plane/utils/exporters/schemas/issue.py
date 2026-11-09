@@ -98,6 +98,7 @@ class IssueExportSchema(ExportSchema):
     priority = StringField(source="priority", label="Priority")
     start_date = DateField(source="start_date", label="Start Date")
     target_date = DateField(source="target_date", label="Target Date")
+    teamogy_job_id = StringField(source="teamogy_job_id", label="Teamogy Job ID")
     state_name = StringField(label="State")
     created_at = DateTimeField(source="created_at", label="Created At")
     updated_at = DateTimeField(source="updated_at", label="Updated At")

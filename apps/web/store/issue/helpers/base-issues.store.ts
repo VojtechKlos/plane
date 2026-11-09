@@ -171,6 +171,8 @@ const ISSUE_ORDERBY_KEY: Record<TIssueOrderByOptions, keyof TIssue> = {
   "-attachment_count": "attachment_count",
   sub_issues_count: "sub_issues_count",
   "-sub_issues_count": "sub_issues_count",
+  teamogy_job_id: "teamogy_job_id",
+  "-teamogy_job_id": "teamogy_job_id",
 };
 
 export abstract class BaseIssuesStore implements IBaseIssuesStore {
@@ -1811,6 +1813,19 @@ export abstract class BaseIssuesStore implements IBaseIssuesStore {
           orderBy(
             array,
             [getSortOrderToFilterEmptyValues.bind(null, "target_date"), "target_date"], //preferring sorting based on empty values to always keep the empty values below
+            ["asc", "desc"]
+          )
+        );
+
+      case "teamogy_job_id":
+        return getIssueIds(
+          orderBy(array, [getSortOrderToFilterEmptyValues.bind(null, "teamogy_job_id"), "teamogy_job_id"])
+        ); //preferring sorting based on empty values to always keep the empty values below
+      case "-teamogy_job_id":
+        return getIssueIds(
+          orderBy(
+            array,
+            [getSortOrderToFilterEmptyValues.bind(null, "teamogy_job_id"), "teamogy_job_id"], //preferring sorting based on empty values to always keep the empty values below
             ["asc", "desc"]
           )
         );

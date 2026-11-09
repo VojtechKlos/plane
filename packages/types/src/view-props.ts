@@ -54,7 +54,9 @@ export type TIssueOrderByOptions =
   | "attachment_count"
   | "-attachment_count"
   | "sub_issues_count"
-  | "-sub_issues_count";
+  | "-sub_issues_count"
+  | "teamogy_job_id"
+  | "-teamogy_job_id";
 
 export type TIssueGroupingFilters = "active" | "backlog";
 
@@ -175,6 +177,7 @@ export interface IIssueDisplayProperties {
   modules?: boolean;
   cycle?: boolean;
   issue_type?: boolean;
+  teamogy_job_id?: boolean;
 }
 
 export type TIssueKanbanFilters = {

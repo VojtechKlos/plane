@@ -43,6 +43,7 @@ from plane.db.models import (
     ProjectMember,
     EstimatePoint,
 )
+from plane.utils.teamogy import normalize_teamogy_job_id
 from plane.utils.content_validator import (
     validate_html_content,
     validate_binary_data,
@@ -62,6 +63,7 @@ class IssueFlatSerializer(BaseSerializer):
             "priority",
             "start_date",
             "target_date",
+            "teamogy_job_id",
             "sequence_id",
             "sort_order",
             "is_draft",
@@ -130,6 +132,9 @@ class IssueCreateSerializer(BaseSerializer):
         label_ids = self.initial_data.get("label_ids")
         data["label_ids"] = label_ids if label_ids else []
         return data
+
+    def validate_teamogy_job_id(self, value):
+        return normalize_teamogy_job_id(value)
 
     def validate(self, attrs):
         allow_triage = self.context.get("allow_triage_state", False)
@@ -803,6 +808,7 @@ class IssueSerializer(DynamicBaseSerializer):
             "priority",
             "start_date",
             "target_date",
+            "teamogy_job_id",
             "sequence_id",
             "project_id",
             "parent_id",
@@ -860,6 +866,7 @@ class IssueListDetailSerializer(serializers.Serializer):
             "priority": instance.priority,
             "start_date": instance.start_date,
             "target_date": instance.target_date,
+            "teamogy_job_id": instance.teamogy_job_id,
             "sequence_id": instance.sequence_id,
             "project_id": instance.project_id,
             "parent_id": instance.parent_id,
@@ -1003,6 +1010,7 @@ class IssueVersionDetailSerializer(BaseSerializer):
             "priority",
             "start_date",
             "target_date",
+            "teamogy_job_id",
             "assignees",
             "sequence_id",
             "labels",

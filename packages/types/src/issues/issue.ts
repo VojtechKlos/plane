@@ -69,6 +69,7 @@ export type TBaseIssue = {
   start_date: string | null;
   target_date: string | null;
   completed_at: string | null;
+  teamogy_job_id?: string | null;
   archived_at: string | null;
 
   created_by: string;

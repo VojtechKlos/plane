@@ -154,6 +154,7 @@ class SubIssuesEndpoint(BaseAPIView):
                 "priority",
                 "start_date",
                 "target_date",
+                "teamogy_job_id",
                 "sequence_id",
                 "project_id",
                 "parent_id",

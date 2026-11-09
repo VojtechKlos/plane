@@ -12,13 +12,13 @@ import { Icon as PropelIcon } from "@makeplane/propel/components/icon";
 import { Menu, MenuContent, MenuItem, MenuTrigger } from "@makeplane/propel/components/menu";
 import { Pill } from "@makeplane/propel/components/pill";
 import { Pill as PillChrome } from "@makeplane/propel/elements/pill";
-import { CalendarOutline, ParentOutline } from "@makeplane/propel/icons";
+import { CalendarOutline, HashOutline, ParentOutline } from "@makeplane/propel/icons";
 import { ETabIndices } from "@plane/constants";
 import { useTranslation } from "@plane/i18n";
 // types
 import type { ISearchIssueResponse, TIssue } from "@plane/types";
 // ui
-import { DateSelect } from "@plane/blocks/property-select";
+import { DateSelect, TextPropertyInput } from "@plane/blocks/property-select";
 import { getDate, renderFormattedPayloadDate, getTabIndex } from "@plane/utils";
 // components
 import { CycleSelect } from "@/components/dropdowns/cycle/cycle-select";
@@ -259,6 +259,24 @@ export const IssueDefaultProperties = observer(function IssueDefaultProperties(p
           )}
         />
       )}
+      <Controller
+        control={control}
+        name="teamogy_job_id"
+        render={({ field: { value, onChange } }) => (
+          <TextPropertyInput
+            value={value}
+            onChange={(jobId) => {
+              onChange(jobId);
+              handleFormChange();
+            }}
+            placeholder={t("common.teamogy_job_id")}
+            icon={<HashOutline className="size-3.5 shrink-0" />}
+            tabIndex={getIndex("teamogy_job_id")}
+            variant="pill-md"
+            testId="create-work-item-teamogy-job-id-input"
+          />
+        )}
+      />
       {parentId ? (
         <Menu>
           <MenuTrigger

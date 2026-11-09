@@ -23,6 +23,7 @@ import {
   IssueRelationActivity,
   IssueStartDateActivity,
   IssueTargetDateActivity,
+  IssueTeamogyJobIdActivity,
   IssueCycleActivity,
   IssueModuleActivity,
   IssueLabelActivity,
@@ -76,6 +77,8 @@ export const IssueActivityItem = observer(function IssueActivityItem(props: TIss
       return <IssueStartDateActivity {...componentDefaultProps} showIssue={false} />;
     case "target_date":
       return <IssueTargetDateActivity {...componentDefaultProps} showIssue={false} />;
+    case "teamogy_job_id":
+      return <IssueTeamogyJobIdActivity {...componentDefaultProps} />;
     case "cycles":
       return <IssueCycleActivity {...componentDefaultProps} />;
     case "modules":

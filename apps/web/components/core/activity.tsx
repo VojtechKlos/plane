@@ -19,6 +19,7 @@ import {
   DuplicateOfOutline,
   EpicOutline,
   GridOutline,
+  HashOutline,
   IntakeOutline,
   LabelsOutline,
   LinkOutline,
@@ -727,6 +728,26 @@ const activityDetails: {
         );
     },
     icon: <CalendarOutline width={12} height={12} className="text-secondary" aria-hidden="true" />,
+  },
+  teamogy_job_id: {
+    message: (activity, showIssue) => (
+      <>
+        {activity.new_value ? (
+          <>
+            set the Teamogy job ID to <span className="font-medium text-primary">{activity.new_value}</span>
+          </>
+        ) : (
+          "removed the Teamogy job ID"
+        )}
+        {showIssue && (
+          <>
+            {activity.new_value ? " for " : " from "}
+            <IssueLink activity={activity} />
+          </>
+        )}
+      </>
+    ),
+    icon: <HashOutline width={12} height={12} className="text-secondary" aria-hidden="true" />,
   },
   inbox: {
     message: (activity, showIssue) => (

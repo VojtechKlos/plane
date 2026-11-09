@@ -27,3 +27,5 @@ export { ProjectSelect } from "./project-select";
 export type { ProjectOption, ProjectSelectProps } from "./project-select";
 export { StateSelect } from "./state-select";
 export type { StateOption, StateSelectProps } from "./state-select";
+export { TextPropertyInput, normalizeTextPropertyValue } from "./text-property-input";
+export type { TextPropertyInputProps, TextPropertyInputVariant } from "./text-property-input";

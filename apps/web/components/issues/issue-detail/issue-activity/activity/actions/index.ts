@@ -15,6 +15,7 @@ export * from "./parent";
 export * from "./relation";
 export * from "./start_date";
 export * from "./target_date";
+export * from "./teamogy-job-id";
 export * from "./cycle";
 export * from "./module";
 export * from "./label";

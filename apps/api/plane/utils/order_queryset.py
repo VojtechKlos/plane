@@ -22,6 +22,7 @@ ISSUE_ORDER_BY_ALLOWLIST = frozenset({
     "sort_order",
     "target_date",
     "start_date",
+    "teamogy_job_id",
     "completed_at",
     "archived_at",
     "priority",

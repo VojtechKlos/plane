@@ -168,6 +168,7 @@ def create_issue_version(issue: Issue, related_data: Dict) -> Optional[IssueVers
             is_draft=issue.is_draft,
             external_source=issue.external_source,
             external_id=issue.external_id,
+            teamogy_job_id=issue.teamogy_job_id,
             type=issue.type_id,
             cycle=related_data["cycle_issues"].get(issue.id),
             modules=related_data["modules"].get(issue.id, []),

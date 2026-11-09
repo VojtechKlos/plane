@@ -16,6 +16,7 @@ import {
   CyclesOutline,
   DueDateOutline,
   EstimateOutline,
+  HashOutline,
   LabelsOutline,
   LinkOutline,
   MembersOutline,
@@ -71,6 +72,7 @@ import {
   SpreadsheetStartDateColumn,
   SpreadsheetStateColumn,
   SpreadsheetSubIssueColumn,
+  SpreadsheetTeamogyJobIdColumn,
   SpreadsheetUpdatedOnColumn,
 } from "@/components/issues/issue-layouts/spreadsheet/columns";
 
@@ -859,6 +861,7 @@ export const SpreadSheetPropertyIconMap: Record<string, FC<ISvgIcons>> = {
   Link2: LinkOutline,
   AttachOutline: AttachOutline,
   WorkItemsOutline: WorkItemsOutline,
+  HashOutline: HashOutline,
 };
 
 export const SPREADSHEET_COLUMNS: { [key in keyof IIssueDisplayProperties]: TSpreadsheetColumn } = {
@@ -876,6 +879,7 @@ export const SPREADSHEET_COLUMNS: { [key in keyof IIssueDisplayProperties]: TSpr
   sub_issue_count: SpreadsheetSubIssueColumn,
   updated_on: SpreadsheetUpdatedOnColumn,
   attachment_count: SpreadsheetAttachmentColumn,
+  teamogy_job_id: SpreadsheetTeamogyJobIdColumn,
 };
 
 export const useGroupByOptions = (

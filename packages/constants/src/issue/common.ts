@@ -33,6 +33,8 @@ export enum EIssueGroupByToServerOptions {
   "cycle" = "cycle_id",
   "module" = "issue_module__module_id",
   "target_date" = "target_date",
+  // "team_project" below reuses this value on purpose.
+  // oxlint-disable-next-line typescript/no-duplicate-enum-values
   "project" = "project_id",
   "created_by" = "created_by",
   // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
@@ -156,6 +158,7 @@ export const ISSUE_DISPLAY_PROPERTIES_KEYS: (keyof IIssueDisplayProperties)[] = 
   "modules",
   "cycle",
   "issue_type",
+  "teamogy_job_id",
 ];
 
 export const SUB_ISSUES_DISPLAY_PROPERTIES_KEYS: (keyof IIssueDisplayProperties)[] = [
@@ -208,6 +211,7 @@ export const ISSUE_DISPLAY_PROPERTIES: {
   },
   { key: "modules", titleTranslationKey: "common.module" },
   { key: "cycle", titleTranslationKey: "common.cycle" },
+  { key: "teamogy_job_id", titleTranslationKey: "common.teamogy_job_id" },
 ];
 
 export const SPREADSHEET_PROPERTY_LIST: (keyof IIssueDisplayProperties)[] = [
@@ -220,6 +224,7 @@ export const SPREADSHEET_PROPERTY_LIST: (keyof IIssueDisplayProperties)[] = [
   "start_date",
   "due_date",
   "estimate",
+  "teamogy_job_id",
   "created_on",
   "updated_on",
   "link",
@@ -348,6 +353,14 @@ export const SPREADSHEET_PROPERTY_DETAILS: {
     descendingOrderKey: "sub_issues_count",
     descendingOrderTitle: "Least",
     icon: "LayersIcon",
+  },
+  teamogy_job_id: {
+    i18n_title: "common.teamogy_job_id",
+    ascendingOrderKey: "teamogy_job_id",
+    ascendingOrderTitle: "A",
+    descendingOrderKey: "-teamogy_job_id",
+    descendingOrderTitle: "Z",
+    icon: "HashOutline",
   },
 };
 

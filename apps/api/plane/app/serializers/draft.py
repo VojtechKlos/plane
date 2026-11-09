@@ -25,6 +25,7 @@ from plane.db.models import (
     Module,
     EstimatePoint,
 )
+from plane.utils.teamogy import normalize_teamogy_job_id
 from plane.utils.content_validator import (
     validate_html_content,
     validate_binary_data,
@@ -71,6 +72,9 @@ class DraftIssueCreateSerializer(BaseSerializer):
         label_ids = self.initial_data.get("label_ids")
         data["label_ids"] = label_ids if label_ids else []
         return data
+
+    def validate_teamogy_job_id(self, value):
+        return normalize_teamogy_job_id(value)
 
     def validate(self, attrs):
         if (
@@ -346,6 +350,7 @@ class DraftIssueSerializer(BaseSerializer):
             "priority",
             "start_date",
             "target_date",
+            "teamogy_job_id",
             "project_id",
             "parent_id",
             "cycle_id",

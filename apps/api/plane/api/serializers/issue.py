@@ -27,6 +27,7 @@ from plane.db.models import (
     User,
     EstimatePoint,
 )
+from plane.utils.teamogy import normalize_teamogy_job_id
 from plane.utils.content_validator import (
     validate_html_content,
     validate_binary_data,
@@ -90,6 +91,9 @@ class IssueSerializer(BaseSerializer):
         if self.instance is not None:
             fields["is_draft"].read_only = True
         return fields
+
+    def validate_teamogy_job_id(self, value):
+        return normalize_teamogy_job_id(value)
 
     def validate(self, data):
         if (

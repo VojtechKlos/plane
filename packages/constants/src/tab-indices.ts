@@ -17,6 +17,7 @@ export const ISSUE_FORM_TAB_INDICES = [
   "cycle_id",
   "module_ids",
   "estimate_point",
+  "teamogy_job_id",
   "parent_id",
   "create_more",
   "discard_button",

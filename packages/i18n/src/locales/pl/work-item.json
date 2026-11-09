@@ -18,6 +18,7 @@
       "assignee": "Dodaj przypisanego",
       "start_date": "Dodaj datę rozpoczęcia",
       "due_date": "Dodaj termin",
+      "teamogy_job_id": "Dodaj Teamogy Job ID",
       "parent": "Dodaj element nadrzędny",
       "sub_issue": "Dodaj podrzędny element pracy",
       "dependency": "Dodaj zależność",
