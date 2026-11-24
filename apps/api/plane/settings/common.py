@@ -390,12 +390,12 @@ CELERY_IMPORTS = (
 
 FILE_SIZE_LIMIT = int(os.environ.get("FILE_SIZE_LIMIT", 5242880))
 
-# Add every workspace member (above Guest) to every project of the workspace
+# Add every workspace member (above Guest) to every non-secret project of the workspace
 # (on by default; PROJECT_AUTO_MEMBERSHIP=0 turns it off),
 # see plane/utils/project_auto_membership.py. The role is capped at the
 # member's workspace role: 5 = Guest (read + comment), 15 = Member, 20 = Admin.
 PROJECT_AUTO_MEMBERSHIP = os.environ.get("PROJECT_AUTO_MEMBERSHIP", "1") == "1"
-PROJECT_AUTO_MEMBERSHIP_ROLE = int(os.environ.get("PROJECT_AUTO_MEMBERSHIP_ROLE", "5"))
+PROJECT_AUTO_MEMBERSHIP_ROLE = int(os.environ.get("PROJECT_AUTO_MEMBERSHIP_ROLE", "15"))
 if PROJECT_AUTO_MEMBERSHIP_ROLE not in (5, 15, 20):
     raise ImproperlyConfigured("PROJECT_AUTO_MEMBERSHIP_ROLE must be 5 (Guest), 15 (Member) or 20 (Admin)")
 

@@ -3,7 +3,8 @@
 # See the LICENSE file for details.
 
 """PROJECT_AUTO_MEMBERSHIP adds every workspace member (above Guest) to every
-project, by default as a Guest who sees all work items and can comment."""
+non-secret project, by default as a Member; as a Guest they see all work items
+and can comment."""
 
 from io import StringIO
 from uuid import uuid4
@@ -110,6 +111,69 @@ class TestEnsureProjectMemberships:
         Project.objects.filter(pk=project.pk).update(archived_at="2026-01-01T00:00:00Z")
         assert ensure_project_memberships(workspace.id) == 0
 
+    def test_secret_projects_are_skipped(self, auto_membership, workspace, project, member):
+        Project.objects.filter(pk=project.pk).update(network=0)
+        assert ensure_project_memberships(workspace.id) == 0
+        assert membership(project, member) is None
+
+
+@pytest.mark.contract
+@pytest.mark.django_db
+class TestUpgradeGuests:
+    """`sync_project_memberships --upgrade-guests` fixes memberships created as Guest."""
+
+    @pytest.fixture
+    def member_role(self, settings):
+        settings.PROJECT_AUTO_MEMBERSHIP_ROLE = MEMBER
+        return settings
+
+    def run(self, *args):
+        out = StringIO()
+        call_command("sync_project_memberships", "--upgrade-guests", *args, stdout=out)
+        return out.getvalue()
+
+    def test_guests_become_members(self, member_role, workspace, project, member):
+        ProjectMember.objects.create(project=project, member=member, workspace=workspace, role=GUEST)
+
+        assert "1 guest(s) upgraded" in self.run()
+        assert membership(project, member).role == MEMBER
+
+    def test_dry_run_changes_nothing(self, member_role, workspace, project, member):
+        ProjectMember.objects.create(project=project, member=member, workspace=workspace, role=GUEST)
+        secret = Project.objects.create(name="Secret", identifier="SCR", workspace=workspace, network=0)
+        ProjectMember.objects.create(project=secret, member=member, workspace=workspace, role=GUEST)
+
+        output = self.run("--dry-run")
+        assert "1 guest(s) to upgrade, 1 secret project guest(s) to remove" in output
+        assert membership(project, member).role == GUEST
+        assert membership(secret, member).role == GUEST
+
+    def test_workspace_guests_and_inactive_rows_are_left_alone(self, member_role, workspace, project, member):
+        guest = make_user(workspace, GUEST)
+        ProjectMember.objects.create(project=project, member=guest, workspace=workspace, role=GUEST)
+        ProjectMember.objects.create(project=project, member=member, workspace=workspace, role=GUEST, is_active=False)
+
+        assert "0 guest(s) upgraded" in self.run()
+        assert membership(project, guest).role == GUEST
+        assert membership(project, member).role == GUEST
+        assert membership(project, member).is_active is False
+
+    def test_guests_leave_secret_projects(self, member_role, workspace, project, member):
+        Project.objects.filter(pk=project.pk).update(network=0)
+        ProjectMember.objects.create(project=project, member=member, workspace=workspace, role=GUEST)
+        invited = make_user(workspace, MEMBER)
+        ProjectMember.objects.create(project=project, member=invited, workspace=workspace, role=MEMBER)
+
+        assert "1 secret project guest(s) removed" in self.run()
+        assert membership(project, member) is None
+        assert membership(project, invited).role == MEMBER
+
+    def test_guest_role_upgrades_nobody(self, auto_membership, workspace, project, member):
+        ProjectMember.objects.create(project=project, member=member, workspace=workspace, role=GUEST)
+
+        assert "0 guest(s) upgraded" in self.run()
+        assert membership(project, member).role == GUEST
+
 
 @pytest.mark.contract
 @pytest.mark.django_db
@@ -152,7 +216,8 @@ class TestHooks:
         sync_project_memberships()
         assert membership(project, member) is None
 
-    def test_management_command(self, workspace, project, member):
+    def test_management_command(self, settings, workspace, project, member):
+        settings.PROJECT_AUTO_MEMBERSHIP_ROLE = GUEST
         out = StringIO()
         call_command("sync_project_memberships", "--dry-run", stdout=out)
         assert "Would add 1 membership(s)" in out.getvalue()
