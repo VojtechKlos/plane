@@ -11,9 +11,9 @@ import { CORE_EXTENSIONS } from "@/constants/extension";
 import { restorePublicImages } from "@/helpers/image-helpers";
 // plugins
 import type { TAdditionalActiveDropbarExtensions } from "@/types/utils";
+import { ClipboardPlugin } from "@/plugins/clipboard";
 import { DropHandlerPlugin } from "@/plugins/drop";
 import { FilePlugins } from "@/plugins/file/root";
-import { MarkdownClipboardPlugin } from "@/plugins/markdown-clipboard";
 import type { IEditorProps, TEditorAsset, TFileHandler } from "@/types";
 
 type TActiveDropbarExtensions =
@@ -77,8 +77,7 @@ export const UtilityExtension = (props: Props) => {
           fileHandler,
         }),
         ...codemark({ markType: this.editor.schema.marks.code }),
-        MarkdownClipboardPlugin({
-          editor: this.editor,
+        ClipboardPlugin({
           getEditorMetaData,
         }),
         DropHandlerPlugin({
@@ -116,7 +115,7 @@ export const UtilityExtension = (props: Props) => {
               uniqueAssets.add(args.asset);
             }
           } else if ("idToRemove" in args) {
-            const asset = this.storage.assetsList.find((asset) => asset.id === args.idToRemove);
+            const asset = this.storage.assetsList.find((storedAsset) => storedAsset.id === args.idToRemove);
             if (asset) {
               uniqueAssets.delete(asset);
             }

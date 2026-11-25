@@ -23,13 +23,18 @@ export const DropHandlerPlugin = (props: Props): Plugin => {
   return new Plugin({
     key: new PluginKey("drop-handler-plugin"),
     props: {
-      handlePaste: (view, event) => {
+      handlePaste: (view, event, slice) => {
         if (
           editor.isEditable &&
           event.clipboardData &&
           event.clipboardData.files &&
           event.clipboardData.files.length > 0
         ) {
+          // Excel, OneNote and some Word versions add a picture of the copied content next to its HTML:
+          // paste the formatted content then, and upload the files only when the HTML holds nothing but images
+          const hasHTML = Array.from(event.clipboardData.types).includes("text/html");
+          if (hasHTML && slice.content.textBetween(0, slice.content.size, " ", " ").trim()) return false;
+
           event.preventDefault();
           const files = Array.from(event.clipboardData.files);
           const acceptedFiles = files.filter(
