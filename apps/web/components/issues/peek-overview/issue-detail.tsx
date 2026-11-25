@@ -13,7 +13,7 @@ import { EFileAssetType } from "@plane/types";
 import type { TNameDescriptionLoader } from "@plane/types";
 // components
 import { DescriptionVersionsRoot } from "@/components/core/description-versions";
-import { DescriptionInput } from "@/components/editor/rich-text/description-input";
+import { WorkItemDescriptionInput } from "@/components/realtime/work-item-description-input";
 // hooks
 import { useIssueDetail } from "@/hooks/store/use-issue-detail";
 import { useMember } from "@/hooks/store/use-member";
@@ -105,7 +105,7 @@ export const PeekOverviewIssueDetails = observer(function PeekOverviewIssueDetai
         value={issue.name}
       />
 
-      <DescriptionInput
+      <WorkItemDescriptionInput
         issueSequenceId={issue.sequence_id}
         containerClassName="-ml-3 border-none"
         disabled={disabled || isArchived}

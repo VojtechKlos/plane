@@ -49,6 +49,8 @@ export class TitleSyncExtension implements Extension {
    * Handle document loading - migrate old titles if needed
    */
   async onLoadDocument({ context, document, documentName }: OnLoadDocumentPayloadWithContext) {
+    // work item descriptions have no title field
+    if (context.documentType === "work_item") return;
     try {
       // initially for on demand migration of old titles to a new title field
       // in the yjs binary
@@ -82,6 +84,7 @@ export class TitleSyncExtension implements Extension {
     context: HocusPocusServerContext;
     instance: Hocuspocus;
   }) {
+    if (context.documentType === "work_item") return;
     // Create a title update manager for this document
     const updateManager = new TitleUpdateManager(documentName, context);
 

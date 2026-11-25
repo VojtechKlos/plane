@@ -68,6 +68,7 @@ from plane.utils.grouper import (
     issue_on_results,
     issue_queryset_grouper,
 )
+from plane.realtime.publisher import EVENT_DELETED, publish_bulk_event
 from plane.utils.host import base_host
 from plane.utils.serializers import writable_data
 from plane.utils.issue_filters import issue_filters
@@ -785,6 +786,7 @@ class BulkDeleteIssuesEndpoint(BaseAPIView):
         issues = Issue.issue_objects.filter(workspace__slug=slug, project_id=project_id, pk__in=issue_ids)
 
         total_issues = len(issues)
+        deleted_issue_ids = [issue.id for issue in issues]
 
         # First, delete all related cycle issues
         CycleIssue.objects.filter(issue__in=issues).delete()
@@ -794,6 +796,9 @@ class BulkDeleteIssuesEndpoint(BaseAPIView):
 
         # Finally, delete the issues themselves
         issues.delete()
+
+        # Realtime: bulk delete bypasses issue_activity
+        publish_bulk_event(EVENT_DELETED, project_id, deleted_issue_ids, request.user.id)
 
         return Response(
             {"message": f"{total_issues} issues were deleted"},

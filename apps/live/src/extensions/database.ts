@@ -16,6 +16,7 @@ import { logger } from "@plane/logger";
 import { AppError } from "@/lib/errors";
 // services
 import { getPageService } from "@/services/page/handler";
+import { fetchWorkItemDocument, storeWorkItemDocument } from "@/realtime/work-item-document";
 // type
 import type { FetchPayloadWithContext, StorePayloadWithContext } from "@/types";
 import { ForceCloseReason, CloseCode } from "@/types/admin-commands";
@@ -24,6 +25,7 @@ import { broadcastError } from "@/utils/broadcast-error";
 import { forceCloseDocumentAcrossServers } from "./force-close-handler";
 
 const fetchDocument = async ({ context, documentName: pageId, instance }: FetchPayloadWithContext) => {
+  if (context.documentType === "work_item") return fetchWorkItemDocument(context, pageId);
   try {
     const service = getPageService(context.documentType, context);
     // fetch details
@@ -75,6 +77,7 @@ const storeDocument = async ({
   documentName: pageId,
   instance,
 }: StorePayloadWithContext) => {
+  if (context.documentType === "work_item") return storeWorkItemDocument(context, pageId, pageBinaryData);
   try {
     const service = getPageService(context.documentType, context);
     // convert binary data to all formats

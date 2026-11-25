@@ -11,6 +11,8 @@ export {
   LiteTextEditorWithRef,
   RichTextEditorWithRef,
 } from "@/components/editors";
+export { CollaborativeRichTextEditorWithRef } from "@/components/editors/rich-text/collaborative-editor";
+export type { ICollaborativeRichTextEditorProps } from "@/components/editors/rich-text/collaborative-editor";
 
 // constants
 export * from "@/constants/common";

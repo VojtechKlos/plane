@@ -10,6 +10,7 @@ import { WorkspaceContentWrapper } from "@/components/workspace/content-wrapper"
 import { AppRailVisibilityProvider } from "@/lib/app-rail";
 import { GlobalModals } from "@/components/common/modal/global";
 import { WorkspaceAuthWrapper } from "@/layouts/auth-layout/workspace-wrapper";
+import { WorkItemRealtimeRoot } from "@/components/realtime/work-item-realtime-root";
 import type { Route } from "./+types/layout";
 
 export default function WorkspaceLayout(props: Route.ComponentProps) {
@@ -18,6 +19,7 @@ export default function WorkspaceLayout(props: Route.ComponentProps) {
   return (
     <AuthenticationWrapper>
       <WorkspaceAuthWrapper>
+        <WorkItemRealtimeRoot workspaceSlug={workspaceSlug} />
         <AppRailVisibilityProvider>
           <WorkspaceContentWrapper>
             <GlobalModals workspaceSlug={workspaceSlug} />

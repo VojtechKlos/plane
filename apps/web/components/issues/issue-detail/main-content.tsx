@@ -13,7 +13,7 @@ import type { TNameDescriptionLoader } from "@plane/types";
 import { EFileAssetType, EIssueServiceType } from "@plane/types";
 // components
 import { DescriptionVersionsRoot } from "@/components/core/description-versions";
-import { DescriptionInput } from "@/components/editor/rich-text/description-input";
+import { WorkItemDescriptionInput } from "@/components/realtime/work-item-description-input";
 import { IssueTypeSwitcher } from "@/components/issues/issue-type-switcher";
 // hooks
 import { useIssueDetail } from "@/hooks/store/use-issue-detail";
@@ -106,7 +106,7 @@ export const IssueMainContent = observer(function IssueMainContent(props: Props)
           value={issue.name}
         />
 
-        <DescriptionInput
+        <WorkItemDescriptionInput
           issueSequenceId={issue.sequence_id}
           containerClassName="-ml-6 border-none p-0! pl-6!"
           disabled={isArchived || !isEditable}

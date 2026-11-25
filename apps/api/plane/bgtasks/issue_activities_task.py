@@ -32,6 +32,7 @@ from plane.db.models import (
     User,
     EstimatePoint,
 )
+from plane.realtime.publisher import publish_activity_event
 from plane.settings.redis import redis_instance
 from plane.utils.exception_logger import log_exception
 from plane.utils.issue_relation_mapper import get_inverse_relation
@@ -1660,6 +1661,9 @@ def issue_activity(
 
         # Save all the values to database
         issue_activities_created = IssueActivity.objects.bulk_create(issue_activities)
+
+        # Realtime: tell open clients the work item changed (after the activity rows exist)
+        publish_activity_event(type, requested_data, issue_id, project, actor_id)
 
         if notification:
             notifications.delay(

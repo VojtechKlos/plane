@@ -425,6 +425,14 @@ def filter_logged_by(params, issue_filter, method, prefix=""):
     return issue_filter
 
 
+def filter_issue_ids(params, issue_filter, method, prefix=""):
+    # Realtime work item updates: narrow a view's list to the given issues to check which still belong to it
+    issue_ids = filter_valid_uuids(str(params.get("issue_ids", "")).split(","))
+    # an empty list matches nothing, so a list of only invalid ids does not return the whole view
+    issue_filter[f"{prefix}id__in"] = issue_ids
+    return issue_filter
+
+
 def issue_filters(query_params, method, prefix=""):
     issue_filter = {}
 
@@ -454,6 +462,7 @@ def issue_filters(query_params, method, prefix=""):
         "sub_issue": filter_sub_issue_toggle,
         "subscriber": filter_subscribed_issues,
         "start_target_date": filter_start_target_date_issues,
+        "issue_ids": filter_issue_ids,
     }
 
     for key, value in ISSUE_FILTER.items():
